@@ -1,0 +1,205 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity
+@using Lib.Data
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+
+    <link href="/lib/css/amazeui.css" rel="stylesheet" />
+    <title>Menu</title>
+    <style type="text/css">
+        dt input{
+            vertical-align:text-bottom;
+        }
+        dl input{
+            vertical-align:text-bottom;
+        }
+        .permission-list2{
+            margin-top:-10px;
+        }
+    </style>
+</head>
+<body>
+    <form id="form1" action="" method="post">
+        <input type="hidden" id="RoleID" name="RoleID" value="@Model.RoleID" />
+        <dl class="permission-list" style="padding:0px;margin:0px;">
+            <dt>
+                <label>
+                    菜单管理
+                </label>
+            </dt>
+            <dd>
+                @{
+                    SqlDataAccess sda = new SqlDataAccess("default");
+                    ///  父菜单列表
+                    var MenuList = ViewData["MenuList"] as List<MenuEntity>;
+                    foreach (var ParentMenu in MenuList)
+                    {
+                        #region  //父菜单权限
+                        string sqlPermissio1 = string.Format(@"select count(0) from T_RoleMenuPermission
+                                                                                                where RoleID = '{0}' and MenuID = '{1}'", Model.RoleID, ParentMenu.MenuID);
+                        int ParentCount = Convert.ToInt32(sda.ExecuteScalar(sqlPermissio1));
+                        #endregion
+                        <dl class="cl permission-list2" style="margin-left:-20px;border-bottom:1px solid #eee;">
+                            <dt style="margin-top:-10px;">
+                                <label>
+                                    <input type="checkbox" value="@ParentMenu.MenuID" @(ParentCount > 0 ? "checked" : "")>
+                                    @ParentMenu.MenuName
+                                </label>
+                            </dt>
+                            @{
+                                //子菜单列表
+                                string sql = string.Format(@"select MenuID,MenuName from T_Menu where MenuParentID='{0}' and IsEnable=1 order by SortNumber", ParentMenu.MenuID);
+                                List<MenuEntity> ChildrenMenu = sda.FindEntities<MenuEntity>(sql);
+
+
+                                if (ChildrenMenu.Count > 0)
+                                {
+                                    <dd style="min-width:450px">
+
+                                        @{
+                                            foreach (var item in ChildrenMenu)
+                                            {
+                                                #region  //子菜单权限
+                                                string sqlPermission2 = string.Format(@"select count(0) from T_RoleMenuPermission
+                                                                                                where RoleID = '{0}' and MenuID = '{1}'", Model.RoleID, item.MenuID);
+                                                int ChildrentCount = Convert.ToInt32(sda.ExecuteScalar(sqlPermission2));
+                                                #endregion
+                                                <label>
+                                                    <input type="checkbox" value="@item.MenuID" @(ChildrentCount > 0 ? "checked" : "")>
+                                                    @item.MenuName
+                                                </label>
+                                            }
+                                        }
+
+                                    </dd>
+                                            }
+                            }
+
+                        </dl>
+                                            }
+                }
+
+
+
+            </dd>
+
+        </dl>
+
+        <div style="text-align:center;margin-top:15px;">
+            <input class="btn btn-primary radius" type="button" id="Add" value="&nbsp;保存&nbsp">
+            &nbsp;&nbsp;
+            <input class="btn btn-primary radius reset" type="button" onclick="CloseArt()" value="&nbsp;关闭&nbsp;">
+        </div>
+    </form>
+
+    <script src="/lib/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="~/lib/js/Common.js"></script>
+    
+    <script type="text/javascript" src="/lib/Validform/5.3.2/Validform.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script>
+
+        $(function () {
+            var chkcount = 0;
+            var chkstring = "";
+            $("#Add").click(function () {
+                var chk = $(":checkbox");
+
+                for (var i = 0; i < chk.length; i++) {
+                    if (chk[i].checked) {
+                        chkcount++;
+                        chkstring += chk[i].value + ",";
+                    }
+                }
+
+            });
+
+
+            //角色添加及表单验证
+            var demo = $("#form1").Validform({
+                tiptype: 2,
+                btnSubmit: "#Add",
+                callback: function () {
+                    $.ajax({
+                        type: "post",
+                        url: "/Admin/Menu",
+                        data: {
+                            RoleID: $("#RoleID").val(),
+                            MenuIDString: chkstring
+                        },
+                        dataType: "json",
+                        timeout: 20000,
+                        success: function (r) {
+
+                            if (r.status == "y") {
+                                layer.msg(r.info, { icon: 1, time: 2000 }, function () {
+                                    //var index = parent.layer.getFrameIndex(window.name);
+                                    //parent.layer.close(index);
+                                    var list = top.dialog.list;
+                                    for (var i in list) {
+                                        list[i].close();
+                                    };
+
+                                });
+
+                            }
+                            else {
+
+                                layer.msg(r.info, { icon: 2, time: 2000 }, function () {
+                                    //var index = parent.layer.getFrameIndex(window.name);
+                                    //parent.layer.close(index);
+                                    var list = top.dialog.list;
+                                    for (var i in list) {
+                                        list[i].close();
+                                    };
+
+                                });
+                            }
+
+                        }
+                    });
+
+                    return false;
+
+                }
+            });
+
+
+            $(".permission-list dt input:checkbox").click(function () {
+                $(this).closest("dl").find("dd input:checkbox").prop("checked", $(this).prop("checked"));
+            });
+            $(".permission-list2 dd input:checkbox").click(function () {
+                var l = $(this).parent().parent().find("input:checked").length;
+                var l2 = $(this).parents(".permission-list").find(".permission-list2 dd").find("input:checked").length;
+                if ($(this).prop("checked")) {
+                    $(this).closest("dl").find("dt input:checkbox").prop("checked", true);
+                    //$(this).parents(".permission-list").find("dt").first().find("input:checkbox").prop("checked", true);
+                }
+                else {
+                    if (l == 0) {
+                        $(this).closest("dl").find("dt input:checkbox").prop("checked", false);
+                    }
+                    if (l2 == 0) {
+                        $(this).parents(".permission-list").find("dt").first().find("input:checkbox").prop("checked", false);
+                    }
+                }
+
+            });
+        });
+    </script>
+
+</body>
+</html>

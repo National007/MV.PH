@@ -1,0 +1,318 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>文件上传设置</title>
+
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+
+    <link href="/lib/css/H-ui.css" rel="stylesheet" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/artDialog/ui_dialog.css" rel="stylesheet" />
+    <link href="/lib/css/amazeui.css" rel="stylesheet" />
+</head>
+<body style="padding-bottom:50px;">
+    <nav class="breadcrumb">
+        <i class="Hui-iconfont">&#xe67f;</i> 首页
+        <span class="c-gray en">&gt;</span> <span id="parentMenu"></span>
+        <span class="c-gray en">&gt;</span> <span id="ChildrenMenu"></span>
+        <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新">
+            <i class="Hui-iconfont">&#xe68f;</i>
+        </a>
+    </nav>
+    @{ 
+        var watermartType = ViewData["watermartType"] as SystemSettingEntity;
+
+        var type1 = "";
+        var type2 = "";
+        var type3 = "";
+        if (watermartType.SystemSettingValue.Trim() == "0")
+        {
+            type1 = "am-active";
+        }
+        if (watermartType.SystemSettingValue.Trim() == "1")
+        {
+            type2 = "am-active";
+        }
+        if (watermartType.SystemSettingValue.Trim() == "2")
+        {
+            type3 = "am-active";
+        }
+    }
+    <div class="pd-20">
+        <form action="" method="post" class="form form-horizontal" id="form-column-add">
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>图片水印类型：</label>
+                <div class="formControls col-4">
+                    <div class="am-btn-group" data-am-button>
+                        <label class="am-btn am-btn-default am-btn-xs @type1">
+                            <input type="radio" name="watermarktype" value="0" @(watermartType.SystemSettingValue.Trim()=="0"?"checked":"")> 关闭水印
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs @type2">
+                            <input type="radio" name="watermarktype" value="1" @(watermartType.SystemSettingValue.Trim()=="1"?"checked":"")> 文字水印
+                        </label>
+                        @*<label class="am-btn am-btn-default am-btn-xs @type3">
+                            <input type="radio" name="watermarktype" value="2" @(watermartType.SystemSettingValue.Trim()=="2"?"checked":"")> 图片水印
+                        </label>*@
+                    </div>
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            @{ 
+
+                var watermarkPosition= ViewData["watermarkPosition"] as SystemSettingEntity;
+                string postion1 = "", postion2 = "", postion3 = "", postion4 = "", postion5 = "", postion6 = "", postion7 = "", postion8 = "", postion9 = "";
+                if (watermarkPosition.SystemSettingValue.Trim() == "1")
+                {
+                    postion1 = "am-active";
+                }
+                if (watermarkPosition.SystemSettingValue.Trim() == "2")
+                {
+                    postion2 = "am-active";
+                }
+                if (watermarkPosition.SystemSettingValue.Trim() == "3")
+                {
+                    postion3 = "am-active";
+                }
+                if (watermarkPosition.SystemSettingValue.Trim() == "4")
+                {
+                    postion4= "am-active";
+                }
+                if (watermarkPosition.SystemSettingValue.Trim() == "5")
+                {
+                    postion5 = "am-active";
+                }
+                if (watermarkPosition.SystemSettingValue.Trim() == "6")
+                {
+                    postion6 = "am-active";
+                }
+                if (watermarkPosition.SystemSettingValue.Trim() == "7")
+                {
+                    postion7 = "am-active";
+                }
+                if (watermarkPosition.SystemSettingValue.Trim() == "8")
+                {
+                    postion8 = "am-active";
+                }
+                if (watermarkPosition.SystemSettingValue.Trim() == "9")
+                {
+                    postion9= "am-active";
+                }
+            }
+
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>图片水印位置：</label>
+                <div class="formControls col-5">
+                    <div class="am-btn-group" data-am-button>
+                        <label class="am-btn am-btn-default am-btn-xs @postion1">
+                            <input type="radio" name="watermarkposition" value="1" @(watermarkPosition.SystemSettingValue.Trim()=="1"?"checked":"")> 左上
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs @postion2">
+                            <input type="radio" name="watermarkposition" value="2" @(watermarkPosition.SystemSettingValue.Trim()=="2"?"checked":"")> 中上
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs @postion3">
+                            <input type="radio" name="watermarkposition" value="3" @(watermarkPosition.SystemSettingValue.Trim()=="3"?"checked":"")> 右上
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs @postion4">
+                            <input type="radio" name="watermarkposition" value="4" @(watermarkPosition.SystemSettingValue.Trim()=="4"?"checked":"")> 左中
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs @postion5">
+                            <input type="radio" name="watermarkposition" value="5" @(watermarkPosition.SystemSettingValue.Trim()=="5"?"checked":"")> 居中
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs @postion6">
+                            <input type="radio" name="watermarkposition" value="6" @(watermarkPosition.SystemSettingValue.Trim()=="6"?"checked":"")> 右中
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs @postion7">
+                            <input type="radio" name="watermarkposition" value="7" @(watermarkPosition.SystemSettingValue.Trim()=="7"?"checked":"")> 左下
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs @postion8">
+                            <input type="radio" name="watermarkposition" value="8" @(watermarkPosition.SystemSettingValue.Trim()=="8"?"checked":"")> 中下
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs @postion9">
+                            <input type="radio" name="watermarkposition" value="9" @(watermarkPosition.SystemSettingValue.Trim()=="9"?"checked":"")> 右下
+                        </label>
+                    </div>
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            @*<div class="row cl">
+                <label class="form-label col-2">图片水印文件：</label>
+                <div class="formControls col-5">
+                    <span class="btn-upload form-group">
+                        <input class="input-text upload-url" type="text" name="uploadfile-1" id="uploadfile-1" readonly style="width:384px">
+                        <a href="javascript:void();" class="btn radius upload-btn"><i class="Hui-iconfont">&#xe642;</i> 上传大图</a>
+                        <input type="file" id="BigIcon" name="BigIcon" class="input-file">
+                    </span>
+                </div>
+                <div class="col-4"> <span class="Validform_checktip"><font class="font_vaild">请上传图片文件格式，格式有/.jpg/.bmp/png/gif/jpeg</font></span></div>
+            </div>*@
+
+
+            @*@{
+                var watermarkPic = ViewData["watermarkPic"] as SystemSettingEntity;
+                var big = "none";
+                if (!string.IsNullOrWhiteSpace(watermarkPic.SystemSettingValue))
+                {
+                    big = "block";
+                }
+                <div class="row cl" id="trImgBig1" style="display:@big">
+                    <label class="form-label col-2"></label>
+                    <div class="formControls col-5">
+                        <img src="@watermarkPic.SystemSettingValue" id="img1" width="100" height="100" />
+                        <div style="width:100px;">
+                            <span style="float:right">
+                                <a href="javascript:void(0)" onclick="Delpic1()">删除</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }*@
+
+            @{ 
+                var watermarkText = ViewData["watermarkText"] as SystemSettingEntity;
+            }
+            <div class="row cl">
+                <label class="form-label col-2">水印文字：</label>
+                <div class="formControls col-5">
+                    <input type="text" class="input-text" value="@watermarkText.SystemSettingValue" placeholder="水印文字" id="watermarktext" name="watermarktext">
+                </div>
+                <div class="col-4">
+                    <span class="Validform_checktip">
+                        <font class="font_vaild">*文字水印的内容</font>
+                    </span>
+                </div>
+            </div>
+
+
+            <div class="row cl">
+                <label class="form-label col-2"></label>
+                <div class="formControls col-4">
+                    <input class="btn btn-primary radius" type="button" id="Add" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input class="btn btn-primary radius reset" type="reset" value="&nbsp;&nbsp;重置&nbsp;&nbsp;">
+                </div>
+            </div>
+
+
+        </form>
+    </div>
+
+    <script src="~/lib/jquery-1.10.2.min.js"></script>
+    
+    <script type="text/javascript" src="/lib/Validform/5.3.2/Validform.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script src="/lib/jquery.form.js"></script>
+    <script src="/lib/js/amazeui.min.js"></script>
+    <script src="~/lib/artDialog/dialog_plus_min.js"></script>
+    <script type="text/javascript" src="~/lib/js/Common.js"></script>
+    <script type="text/javascript">
+
+        ///删除LOGO图片
+        function Delpic1() {
+            top.dialog({
+                title: '提示',
+                content: '您确定要删除该图片？',
+                okValue: '确定',
+                ok: function () {
+                    var v = {};
+                    $.post("/System/Delwater", v, function (r) {
+                        if (r.Status > 0) {
+                            var d = top.dialog({ content: r.Message, width: "100px" }).show();
+                            setTimeout(function () {
+                                $("#uploadfile-1").val("");
+                                $("#BigIcon").val("");
+                                $("#trImgBig1").hide();
+                                d.close().remove();
+                            }, 2000);
+
+                        }
+                        else {
+                            var d = top.dialog({ content: r.Message, width: "100px" }).show();
+                            setTimeout(function () {
+                                d.close().remove();
+                            }, 2000);
+                        }
+                    });
+                },
+                cancelValue: '取消',
+                cancel: function () { }
+            }).showModal();
+        }
+
+        $(function () {
+
+            $("#BigIcon").on("change", function () {
+                var file = this.files[0];
+                var filename = $("#BigIcon").val();
+                var fileType = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+                if (fileType == "png" || fileType == "gif" || fileType == "bmp" || fileType == "jpg" || fileType == "jpeg") {
+                    if (this.files && file) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $("#img1").attr("src", e.target.result);
+                            $("#trImgBig1").show();
+                            $("#img1").show();
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                }
+                else {
+                    alert("请上传图片文件");
+                    $("#BigIcon").val("");
+                }
+
+            });
+            //用户添加及表单验证
+            var demo = $("#form-column-add").Validform({
+                tiptype: 2,
+                btnSubmit: "#Add",
+                btnReset: ".reset",
+                callback: function () {
+                    $('#form-column-add').ajaxSubmit({
+                        type: "post",
+                        url: "/System/sys_config",
+                        dataType: "json",
+                        timeout: 20000,
+                        success: function (r) {
+
+                            if (r.status == "y") {
+                                layer.msg(r.info, { icon: 1, time: 2000 }, function () {
+                                    location.href = location.href;
+                                });
+
+                            }
+                            else {
+
+                                layer.msg(r.info, { icon: 2, time: 2000 }, function () {
+                                    location.href = location.href;
+                                    //var list = top.dialog.list;
+                                    //for (var i in list) {
+                                    //    list[i].close();
+                                    //};
+                                });
+                            }
+
+                        }
+                    });
+
+                    return false;
+
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>

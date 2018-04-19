@@ -1,0 +1,629 @@
+﻿@{
+    Layout = null;
+}
+@using MV.PH.Entity
+@using MV.PH.WebAdmin.Inc
+@using MV.PH.WebAdmin.Model.Article
+@model ArticleInfoEntity
+@using MV.PH.WebAdmin.Model.Column;
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <link href="/lib/css/H-ui.css" rel="stylesheet" />
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/kindeditor/themes/default/default.css" rel="stylesheet" />
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/artDialog/ui_dialog.css" rel="stylesheet" />
+    <link href="/lib/css/amazeui.css" rel="stylesheet" />
+    <link href="/lib/css/style.css" rel="stylesheet" />
+    
+    <title>资讯修改</title>
+    <style type="text/css">
+        .disabled_lable {
+            height: 31px;
+            min-width: 187.33px;
+            line-height: 31px;
+            padding-left: 10px;
+            border: 1px solid #F5F5F5;
+            background: #ccc;
+            font-weight: normal;
+        }
+
+            .disabled_lable:hover {
+                cursor: not-allowed;
+            }
+    </style>
+</head>
+<body>
+    <nav class="breadcrumb" style="font-size:16px;"><a href="javascript:;" onclick="back()"><i class="Hui-iconfont">&#xe6dc;</i> 返回上一页</a></nav>
+    @{
+        var User = Session["user"] as UserEntity;    //管理员信息表
+        var Role = ViewData["Role"] as RoleEntity;     //角色信息表
+        Column_dal dal = new Column_dal();
+        Article_dal art_dal = new Article_dal();
+    }
+    <div class="pd-20">
+        <form action="" method="post" class="form form-horizontal" id="form-article-edit">
+            <input type="hidden" id="ArticleInfoID" name="ArticleInfoID" value="@Model.ArticleInfoID" />
+            @{
+                string[] str = art_dal.GetForbiddenWord().ToString().TrimEnd('|').Trim().Split('|');
+                string Title = Model.ArticleTitle;  //文章标题
+                string Content = Model.ArticleContent;  //文章内容
+                for (int i = 0; i < str.Length; i++)
+                {
+                    if (Title.Contains(str[i]))
+                    {
+                        Title = Title.Replace(str[i], "**");
+                    }
+                    if (Content.Contains(str[i]))
+                    {
+                        Content = Content.Replace(str[i], "**");
+                    }
+                }
+            }
+            <div class="row cl">
+                <label class="form-label col-1"><span class="c-red">*</span>文章标题：</label>
+                <div class="formControls col-5">
+                    <input type="text" class="input-text" value="@Title" placeholder="" id="ArticleTitle" name="ArticleTitle" datatype="*" nullmsg="文章标题不为空">
+                </div>
+                <div class="col-4"></div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-1"><span class="c-red">*</span>所属栏目：</label>
+                <div class="formControls col-2">
+                    @*<select class="select-box inline" id="ColumnID" name="ColumnID" disabled style="min-width:187px" datatype="*" nullmsg="请选择所属类别">
+                            <option value="">所有类别</option>
+                            @{
+
+
+                            SqlDataAccess sda = new SqlDataAccess("default");
+
+                            var list = ViewData["list"] as List
+                            <ColumnEntity>
+                                ;
+                                var strwhere = "";   // 文章栏目类别查询
+                                if (User.IsAdmin == Convert.ToInt32(Post.SuperAdmin))  //超管
+                                {
+                                strwhere = string.Format(@"select
+                                ColumnID,ColumnName
+                                from
+                                T_Column where 1=1 ");
+                                }
+                                else   //普管
+                                {
+                                strwhere = string.Format(@"select
+                                A.ColumnName,A.ColumnID
+                                from
+                                T_Column A
+                                inner join T_RoleColumnPermission B ON A.ColumnID=B.ColumnID
+                                WHERE B.RoleID='{0}'", Role.RoleID);
+                                }
+
+                                foreach (var item in list)
+                                {
+                                <option value="@item.ColumnID" @(Model.ColumnID= =item.ColumnID ? "selected"
+                                        "" )>&nbsp; &nbsp;    ├@item.ColumnName</option>
+
+                                string sql = string.Format(@"{1} and ColumnParentID='{0}' order by SortNumber", item.ColumnID, strwhere);
+
+                                List<ColumnEntity>
+                                    Column = sda.FindEntities<ColumnEntity>
+                                        (sql);
+                                        foreach (var childColumn in Column)
+                                        {
+                                        <option value="@childColumn.ColumnID" @(Model.ColumnID= =childColumn.ColumnID ? "selected"
+                                                "" )>&nbsp; &nbsp;  &nbsp; &nbsp;    ├  @childColumn.ColumnName</option>
+                                        }
+                                        }
+                                        }
+
+
+                        </select>*@
+                    <label class="disabled_lable">
+                        @(dal.GetColumnNameByColumnID(Model.ColumnID))
+                    </label>
+                </div>
+
+                <div class="col-4"> </div>
+            </div>
+
+            @{
+                var state1 = "";
+                var state2 = "";
+                if (Model.IsEnable == 1)
+                {
+                    state1 = "am-active";
+                }
+                else
+                {
+                    state2 = "am-active";
+                }
+            }
+
+            <div class="row cl">
+                <label class="form-label col-1"><span class="c-red">*</span>显示状态：</label>
+                <div class="formControls col-5">
+                    <div class="am-btn-group" data-am-button>
+                        <label class="am-btn am-btn-default am-btn-xs @state1">
+                            <input type="radio" name="IsEnable" value="1" @(Model.IsEnable == 1 ? "checked" : "")> 显示
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs @state2">
+                            <input type="radio" name="IsEnable" value="0" @(Model.IsEnable == 0 ? "checked" : "")> 不显示
+                        </label>
+                    </div>
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            @{
+                string type1 = "", type2 = "";
+                int value1 = 0, value2 = 0;
+                if (Model.IsToppest == 1)
+                {
+                    type1 = "am-active";
+                    value1 = 1;
+                }
+                if (Model.IsToppest == 1)
+                {
+                    type2 = "am-active";
+                    value2 = 1;
+                }
+            }
+
+            <div class="row cl">
+                <label class="form-label col-1">推荐类型：</label>
+
+                <div class="am-btn-group" data-am-button>
+                    <label class="am-btn am-btn-default am-btn-xs @type1">
+                        <input type="checkbox" id="IsToppest" name="IsToppest" value="@value1" onchange="change(this)"> 置顶
+                    </label>
+                    <label class="am-btn am-btn-default am-btn-xs @type2">
+                        <input type="checkbox" id="IsRecommend" name="IsRecommend" value="@value2" onchange="change(this)"> 推荐
+                    </label>
+                </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-1"><span class="c-red">*</span>排序数字：</label>
+                <div class="formControls col-2">
+                    <input type="text" class="input-text" value="@Model.SortNumber" placeholder="" id="SortNumber" name="SortNumber" datatype="n" nullmsg="请输入排序号" errormsg="纯数字格式">
+                </div>
+                <div class="col-2"> </div>
+
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-1"><span class="c-red">*</span>阅读次数：</label>
+                <div class="formControls col-2">
+                    <input type="text" class="input-text" value="@Model.ReadCount" placeholder="" id="ReadCount" name="ReadCount" datatype="n" nullmsg="阅读次数不为空" errormsg="纯数字格式">
+                </div>
+                <div class="col-2"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-1">物理名称：</label>
+                <div class="formControls col-2">
+                    <input type="text" class="input-text" value="@Model.PhysicsName" placeholder="用于关联某个特定文章" id="PhysicsName" name="PhysicsName">
+                </div>
+                <div class="col-4"></div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-1">文章类型：</label>
+                <div class="formControls col-2">
+                    @*<select class="select-box inline" disabled id="ArticleType" name="ArticleType" style="min-width:200px" datatype="*" nullmsg="请选择文章类型">
+                            <option value="text" @(Model.ArticleType= ="text" ? "selected"
+                                    "" )>文本</option>
+                            <option value="image" @(Model.ArticleType= ="image" ? "selected"
+                                    "" )>图片</option>
+                            <option value="video" @(Model.ArticleType= ="video" ? "selected"
+                                    "" )>视频</option>
+                        </select>*@
+                    <input type="hidden" id="ArticleType" name="ArticleType" value="@Model.ArticleType" />
+                    <label class="disabled_lable">
+                        @{
+                            if (Model.ArticleType.Trim() == "text_list")
+                            {
+                                @:文本列表
+                        }
+                            if (Model.ArticleType.Trim() == "text_image")
+                            {
+                                @:文本图片
+                        }
+                            if (Model.ArticleType.Trim() == "image")
+                            {
+                                @:图片
+                        }
+                            if (Model.ArticleType.Trim() == "video")
+                            {
+                                @:视频
+                        }
+                        }
+                    </label>
+                </div>
+                <div class="col-2"> </div>
+
+            </div>
+
+            @{
+                string file = "none", photo = "none", video = "none",file1="none";
+                if(Model.ArticleType.Trim()== "text_list"||Model.ArticleType.Trim()== "text_image")
+                {
+                    file = "block";
+                    if(Model.ArticleType.Trim()== "text_image")
+                    {
+                        file1 = "block";
+                    }
+                }
+                else if(Model.ArticleType.Trim() == "image")
+                {
+                    photo = "block";
+                }
+                else if (Model.ArticleType.Trim() == "video")
+                {
+                    video = "block";
+                    file1 = "block";
+                    file = "block";
+                }
+                else
+                {
+                    file = "block";
+                }
+
+            }
+
+            <div class="row cl" id="faceImg" style="display:@file1">
+                <label class="form-label col-1">封面图片：</label>
+                <div class="formControls col-5">
+                    <span class="btn-upload form-group">
+                        <input class="input-text upload-url" type="text" name="uploadfile-1" id="uploadfile-1" readonly style="width:352px">
+                        <a href="javascript:void();" class="btn btn-primary radius upload-btn"><i class="Hui-iconfont">&#xe642;</i> 上传封面图片</a>
+                        <input type="file" id="BigIcon" name="BigIcon" class="input-file">
+                    </span>
+                </div>
+                <div class="col-4"> <span class="Validform_checktip"><font class="font_vaild">请上传图片文件格式，格式有/.jpg/.bmp/png/gif/jpeg</font></span></div>
+            </div>
+
+            @{
+                var attachEntity = ViewData["attachentity"] as ArticleAttachmentEntity;
+                var big = "none";
+                if (attachEntity!=null)
+                {
+                    <div class="row cl" id="trImgBig1">
+                        <label class="form-label col-1"></label>
+                        <div class="formControls col-5">
+                            <img src="@attachEntity.ThumbnailthumbnailThumbnail" id="img1" width="100" height="100" />
+                            <div style="width:100px;">
+                                <span style="float:right">
+                                    <a href="javascript:void(0)" onclick="Delpic1('@attachEntity.ArticleAttachmentID')">删除</a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="row cl" id="trImgBig1" style="display:@big">
+                        <label class="form-label col-1"></label>
+                        <div class="formControls col-5">
+                            <img src="" id="img1" width="100" height="100" />
+                            <div style="width:100px;">
+                                <span style="float:right">
+                                    <a href="javascript:void(0)" onclick="Delpic1('')">删除</a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+            }
+
+            <div class="row cl">
+                <label class="form-label col-1"><span class="c-red">*</span>文章来源：</label>
+                <div class="formControls col-2">
+                    <input type="text" class="input-text" value="@Model.ArticleSource" placeholder="" id="ArticleSource" name="ArticleSource" datatype="*" nullmsg="文章来源不为空">
+                </div>
+                <div class="col-2"> </div>
+            </div>
+
+
+            <div class="row cl" id="Attach_Files" style="display:@file">
+                <label class="form-label col-1">上传附件：</label>
+                <div class="formControls col-11">
+                    <a class="imgbtn" title="添加附件" href="javascript:;">
+                        添加附加
+                    </a>
+                    <div id="showAttachList" class="attach-list">
+                        <ul>
+                            @{
+                                var attachList = ViewData["attachList"] as List<ArticleAttachmentEntity>;
+                                foreach (var item in attachList)
+                                {
+                                    <li>
+                                        <input name="hid_attach_id" type="hidden" value="@item.ArticleAttachmentID" />
+                                        <input name="hid_attach_filename" type="hidden" value="@item.FileName" />
+                                        <input name="hid_attach_filepath" type="hidden" value="@item.PhysicsName" />
+                                        <input name="hid_attach_filesize" type="hidden" value="@item.FileSize" />
+                                        <input name="hid_attach_filetype" type="hidden" value="@item.FileType" />
+                                        <i class="icon"></i>
+                                        <a href="javascript:;" onclick="delAttachNode(this);" class="del" title="删除附件"></a>
+                                        <a href="javascript:;" onclick="showAttachDialog(this);" class="edit" title="更新附件"></a>
+                                        <div class="title" title="@item.FileName">@item.FileName</div>
+                                        <div class="info">类型：<span class="ext">@item.FileType</span> 大小：<span class="size">@item.FileSize</span> </div>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="row cl" id="Attach_Photo" style="display:@photo">
+                <label class="form-label col-1"><span class="c-red">*</span>图片相册：</label>
+                <div class="formControls col-11">
+                    <div class="upload-box upload-album"></div>
+                    <div class="photo-list">
+                        <ul>
+                            @{
+                                foreach (var item in attachList)
+                                {
+                                    <li>
+                                        <input type="hidden" name="hid_photo_remark" value="@item.FileRemark" />
+                                        <input type="hidden" name="ElintAttachment" id="ElintAttachment" value="@item.FileName|@item.FileType|@item.PhysicsName|@item.FileSize|@item.ThumbnailthumbnailThumbnail" />
+                                        <div class="img-box" onclick="setFocusImg(this);">
+                                            <img src="@item.PhysicsName" />
+                                            <span class="remark"><i>@(string.IsNullOrWhiteSpace(item.FileRemark) ? "暂无描述..." : item.FileRemark)</i></span>
+                                        </div>
+                                        <div class="handle">
+                                            <a id="handle_left" href="javascript:;" onclick="setRemark(this);">描述</a>
+                                            <a id="handle_right" href="javascript:;" onclick="delImg(this);">删除</a>
+                                        </div>
+                                    </li>
+                                }
+                            }
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="Attach_Video" class="row cl" style="display:@video">
+                <label class="form-label col-1">视频上传：</label>
+                <div class="formControls col-4">
+                    @{
+                        foreach (var item in attachList)
+                        {
+                            <input type="hidden" id="hidFilePath" name="hidFilePath" value="@item.PhysicsName" class="upload-path" />
+                                                                                    <input type="hidden" id="hidFileSize" name="hidFileSize" value="@item.FileSize" class="upload-size" />
+                                                                                    <input type="hidden" id="hidFileType" name="hidFileType" value="@item.FileType" class="upload-type" />
+                                                                                    <input type="hidden" id="hidFileName" name="hidFileName" value="@item.FileName" class="upload-name" />
+
+                                                                                    <input name="upload-name" type="text" value="@item.FileName" style="width:187.33px;" id="field_control_video_src" class="input-text upload-name" />
+                                                                                    <div class="upload-box upload-video" style="margin-left:4px;"></div>
+                        }
+                    }
+
+                </div>
+                <div class="col-4"> <span class="Validform_checktip"><font class="font_vaild">仅支持flv,mp4,avi格式视频上传</font></span></div>
+            </div>
+
+            <div class="row cl" id="Article_Content" style="display:@file">
+                <label class="form-label col-1">内容描述：</label>
+                <div class="formControls col-11">
+                    <textarea name="content" id="content" style="visibility:hidden">@Content</textarea>
+                </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-1"></label>
+                <div class="formControls col-10">
+                    <button class="btn btn-primary radius" id="Add" type="button"><i class="Hui-iconfont">&#xe632;</i> 提交保存</button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <button class="btn btn-default radius reset" type="reset">&nbsp;&nbsp;重置&nbsp;&nbsp;</button>
+                </div>
+            </div>
+
+
+        </form>
+    </div>
+    <script src="/lib/jquery-1.10.2.js"></script>
+    <script src="/lib/js/amazeui.min.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script type="text/javascript" src="/lib/js/Common.js"></script>
+    <script src="/lib/artDialog/dialog_plus_min.js"></script>
+    <script src="/lib/Validform/5.3.2/Validform.min.js"></script>
+    <script src="/lib/jquery.form.js"></script>
+    <script src="/lib/kindeditor/kindeditor.js"></script>
+    <script type="text/javascript" src="/lib/js/Common.js"></script>
+    <script src="/lib/js/webuploader.min.js"></script>
+    <script src="/lib/js/uploader2.js"></script>
+    <script>
+
+        //删除封面图片
+        function Delpic1(ID) {
+            top.dialog({
+                title: '提示',
+                content: '您确定要删除该图片？',
+                okValue: '确定',
+                ok: function () {
+                    var v = {};
+                    v.ArticleAttachmentID = ID,
+                    $.post("/Article/DelFaceImg", v, function (r) {
+                        if (r.Status > 0) {
+                            var d = top.dialog({ content: "删除成功!", width: "100px" }).show();
+                            setTimeout(function () {
+                                $("#uploadfile-1").val("");
+                                $("#BigIcon").val("");
+                                $("#trImgBig1").hide();
+                                d.close().remove();
+                            }, 2000);
+
+                        }
+                        else {
+                            var d = top.dialog({ content: r.Message, width: "100px" }).show();
+                            setTimeout(function () {
+                                d.close().remove();
+                            }, 2000);
+                        }
+                    });
+                },
+                cancelValue: '取消',
+                cancel: function () { }
+            }).showModal();
+        }
+
+        //初始化附件窗口
+        function showAttachDialog(obj) {
+            var objNum = arguments.length;
+            var attachDialog = top.dialog({
+                id: 'attachDialogId',
+                title: "上传附件",
+                url: '/Article/dialog_attach',
+                width: 500,
+                height: 80,
+                onclose: function () {
+                    var liHtml = this.returnValue; //获取返回值
+                    if (liHtml.length > 0) {
+                        $("#showAttachList").children("ul").append(liHtml);
+                    }
+                }
+            }).showModal();
+            //如果是修改状态，将对象传进去
+            if (objNum == 1) {
+                attachDialog.data = obj;
+            }
+        }
+
+        function change(obj) {
+
+            if ($(obj).val() == "0") {
+
+                $(obj).val("1");
+
+            }
+
+            else {
+
+                $(obj).val("0");
+
+            }
+
+        }
+
+
+        $(function () {
+            $("#BigIcon").on("change", function () {
+                var file = this.files[0];
+                var filename = $("#BigIcon").val();
+                var fileType = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+                if (fileType == "png" || fileType == "gif" || fileType == "bmp" || fileType == "jpg" || fileType == "jpeg") {
+                    if (this.files && file) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $("#img1").attr("src", e.target.result);
+                            $("#trImgBig1").show();
+                            $("#img1").show();
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                }
+                else {
+                    alert("请上传图片文件");
+                    $("#BigIcon").val("");
+                }
+
+            });
+
+            $(".upload-album").InitUploader({ btntext: "批量上传", multiple: true, thumbnail: true, filesize: "10240", sendurl: "/action/common.ashx", swf: "/js/Uploader.swf" });
+            $(".upload-video").InitUploader({ filesize: "1024000", sendurl: "/action/common.ashx", swf: "/js/Uploader.swf",filetypes: "flv,mp4,avi" });
+
+            //alert(document.referrer);  获取上一页的URL地址
+
+            //var editorMini = KindEditor.create('#txtContent', {
+            //    width: '100%',
+            //    height: '250px',
+            //    resizeType: 1,
+            //    uploadJson: '/action/upload_json.ashx?action=EditorFile&IsWater=1',
+            //    items: [
+            //        'source', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+            //        'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertorderedlist',
+            //        'insertunorderedlist', '|', 'image', 'emoticons', 'link', 'fullscreen']
+            //});
+
+            //创建上传附件
+            $(".imgbtn").click(function () {
+                showAttachDialog();
+            });
+
+            var editorDefault = KindEditor.create('textarea[name="content"]', {
+                width: '100%',
+                height: '350px',
+                resizeType: 1,
+                cssPath: '/kindeditor/plugins/code/prettify.css',
+                //uploadJson: '/action/upload_json.ashx',
+                uploadJson: '/action/common.ashx?action=uploadFile&IsType=1',
+                fileManagerJson: '/action/file_manager_json.ashx',
+                allowFileManager: @(User.IsAdmin==Convert.ToInt32(Post.SuperAdmin)?"true":"false"),
+            });
+
+            var demo = $("#form-article-edit").Validform({
+                btnSubmit: "#Add",
+                tiptype: 2,
+                btnReset: ".reset",
+                callback: function () {
+                    $('#form-article-edit').ajaxSubmit({
+                        type: "post",
+                        url: "/Article/Edit",
+                        data: {
+                            ArticleContent: function () {
+                                return editorDefault.html()
+                            },
+                            IsToppest: function () {
+                                return $("#IsToppest").val()
+                            },
+                            IsRecommend: function () {
+                                return $("#IsRecommend").val()
+                            },
+                        },
+                        dataType: "json",
+                        timeout: 20000,
+                        success: function (r) {
+
+                            if (r.status == "y") {
+                                layer.msg(r.info, { icon: 1, time: 2000 }, function () {
+                                    window.location.href=document.referrer;
+                                });
+
+                            }
+                            else {
+
+                                layer.msg(r.info, { icon: 2, time: 2000 }, function () {
+                                    location.href=location.href;
+                                });
+                            }
+
+                        }
+                    });
+
+                    return false;
+
+                }
+            });
+
+
+        });
+
+    </script>
+</body>
+</html>

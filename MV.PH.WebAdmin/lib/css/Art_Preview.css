@@ -1,0 +1,220 @@
+﻿body {
+    background: #F7F7F7;
+    font-size: 14px;
+    color: #333;
+    font: 14px/1.5 "Microsoft Yahei";
+}
+.btn{
+            padding:4px 12px
+        }
+        .radius{border-radius: 3px}
+/*成功*/
+.btn-success{color:#fff;background-color:#5eb95e; border-color:#5eb95e}
+.btn-success:hover,
+.btn-success:focus,
+.btn-success:active,
+.btn-success.active{color:#fff;background-color:#429842;border-color:#429842;cursor:pointer}
+
+/*警告*/
+.btn-warning{color:#fff;background-color:#f37b1d; border-color:#f37b1d}
+.btn-warning:hover,
+.btn-warning:focus,
+.btn-warning:active,
+.btn-warning.active{color:#fff;background-color:#c85e0b;border-color:#c85e0b;cursor:pointer}
+
+/*危险*/
+.btn-danger{color:#fff;background-color:#dd514c; border-color:#dd514c}
+.btn-danger:hover,
+.btn-danger:focus,
+.btn-danger:active,
+.btn-danger.active{color:#fff;background-color:#c62b26;border-color:#c62b26;cursor:pointer}
+
+/*链接*/
+.btn-link{color:#0e90d2;cursor:pointer;border-color:transparent;background-color:transparent}
+.btn-link:hover,
+.btn-link:focus,
+.btn-link:active,
+.btn-link.active{color:#095f8a;background-color:transparent}
+
+a {
+    color: #333;
+    text-decoration: none;
+}
+
+    a:hover {
+        color: red;
+    }
+
+.imgbtn {
+    border: 1px solid #D9D9D9;
+    background: #fff;
+    padding: 5px 8px;
+    font-size: 14px;
+    color: #333;
+}
+
+    .imgbtn:hover {
+        background: #F5F5F5;
+        color: #333;
+    }
+
+
+.operating {
+    width: 94%;
+    margin: 0px auto;
+    height: 40px;
+    border: 0px solid red;
+    margin-top: 50px;
+    padding-top: 20px;
+}
+
+h1 {
+    font-weight: normal;
+}
+
+.title {
+    text-align: center;
+    font: bold 22px/35px "宋体";
+    color: #333;
+    margin-top: 20px;
+}
+
+.summary {
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+    padding-bottom: 20px;
+    margin-top: 10px;
+}
+
+    .summary .column {
+        font-weight: bold;
+    }
+
+    .summary .create {
+    }
+
+    .summary .state {
+        width: 90%;
+        margin: 0px auto;
+        border: 0px solid #ffd800;
+        height: 20px;
+    }
+
+        .summary .state #left {
+            float: left;
+        }
+
+        .summary .state #right {
+            float: right;
+        }
+
+.state_success {
+    background: #5EB95E;
+    padding: 3px 8px;
+    color: #fff;
+    border-radius: 3px;
+}
+
+.state_fail {
+    background: #DE5347;
+    padding: 3px 8px;
+    color: #fff;
+    border-radius: 3px;
+}
+
+.state_no {
+    background: #FF7A35;
+    padding: 3px 8px;
+    color: #fff;
+    border-radius: 3px;
+}
+
+.content {
+    width: 90%;
+    margin: 0px auto;
+    line-height: 2em;
+    font: 14px/1.5 "Microsoft Yahei";
+    margin-top: 20px;
+    padding-bottom: 10px;
+}
+
+.footer {
+    width: 90%;
+    margin: 0px auto;
+    height: 40px;
+    border: 0px solid red;
+    line-height: 40px;
+    text-align: right;
+}
+
+
+.permission-list dd a {
+    text-decoration: underline;
+}
+
+
+/* 返回顶部 */
+.go-top {
+    position: fixed;
+    bottom: 40px;
+    right: 0px;
+    width: 46px;
+    z-index: 999;
+}
+
+    .go-top a {
+        display: block;
+        width: 46px;
+        height: 46px;
+        margin-bottom: 10px;
+        background-image: url(/images/go-top.png);
+    }
+
+        .go-top a:last-child {
+            margin-bottom: 0;
+        }
+
+    .go-top .go {
+        background-position: 0 -150px;
+    }
+
+        .go-top .go:hover {
+            background-position: 0 -250px;
+        }
+
+    .go-top .feedback {
+        background-position: 0 -100px;
+    }
+
+        .go-top .feedback:hover {
+            background-position: 0 -300px;
+        }
+
+    .go-top .uc-2vm {
+        background-position: 0 0;
+    }
+
+        .go-top .uc-2vm:hover {
+            background-position: 0 -350px;
+        }
+    /*
+        .go-top .share{background-position: 0 -50px;}
+        .go-top .share:hover{background-position: 0 -200px;}
+        */
+    .go-top .uc-2vm-pop {
+        position: absolute;
+        right: 60px;
+        top: -100px;
+        width: 240px;
+        box-shadow: 0px 1px 4px rgba(0,0,0,.1);
+        background: #fff;
+    }
+
+        .go-top .uc-2vm-pop .title-2wm {
+            font-size: 14px;
+            margin: 10px 20px;
+        }
+
+        .go-top .uc-2vm-pop .logo-2wm-box {
+            position: relative;
+        }

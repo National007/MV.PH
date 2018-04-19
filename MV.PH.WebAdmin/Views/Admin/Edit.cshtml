@@ -1,0 +1,217 @@
+﻿
+
+@using MV.PH.Entity
+@using MV.PH.WebAdmin.Inc
+@using MV.PH.WebAdmin.Model.Admin
+@model UserEntity
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,member-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <title>Add</title>
+
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/icheck/icheck.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+
+    <link href="~/lib/css/amazeui.css" rel="stylesheet" />
+</head>
+<body>
+    <div>
+        <form action="" method="post" class="form form-horizontal" id="form-admin-add">
+            <input type="hidden" id="UserID" name="UserID" value="@Model.UserID" />
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>真实姓名：</label>
+                <div class="formControls col-7">
+                    <input type="text" class="input-text" value="@Model.UserName" placeholder="姓名" id="UserName" name="UserName" nullmsg="姓名不能为空" datatype="*" @*errormsg="请输入2-4个中文"*@>
+                </div>
+                <div class="col-3"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>用户名：</label>
+                <div class="formControls col-7">
+                    <input type="text" class="input-text" value="@Model.LoginName" placeholder="用户名" id="LoginName" name="LoginName" datatype="account" nullmsg="用户名不能为空">
+                </div>
+                <div class="col-3"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>密码：</label>
+                <div class="formControls col-7">
+                    <input type="password" class="input-text" plugin="passwordStrength" placeholder="密码" id="LoginPassword" name="LoginPassword">
+
+                </div>
+                <div class="col-3">
+                    <span class="Validform_checktip"><font class="font_vaild">密码为空即不修改密码</font></span>
+                </div>
+            </div>
+
+            @*<div class="row cl">
+                    <label class="form-label col-3"></label>
+                    <div class="formControls col-7">
+                        <b style="font-size:12px;">密码强度：</b>
+                        <span class="passwordStrength">
+                            <span>弱</span><span>中</span><span class="last">强</span>
+                        </span>
+                    </div>
+                    <div class="col-3"></div>
+                </div>*@
+
+            @*<div class="row cl">
+                    <label class="form-label col-2"><span class="c-red">*</span>隶属角色：</label>
+                    <div class="formControls col-7">
+
+                        <dl style="padding:0px;margin:0px;margin-top:15px;background:#fff;">
+                            <dt style="min-width:240px;">
+                                @{
+                                    var Role = ViewData["Role"] as List<RoleEntity>;
+                                    Role_dal dal = new Role_dal();
+                                    foreach (var item in Role)
+                                    {
+                                        <label>
+                                            <input type="checkbox" value="@item.RoleID" @(dal.GetRolesByUserID(Model.UserID,item.RoleID)>0?"checked":"") /> @item.RoleName
+                                        </label>
+                                    }
+                                }
+
+                            </dt>
+                        </dl>
+
+                    </div>
+                    <div class="col-3"> </div>
+                </div>*@
+
+            <div class="row cl">
+                <label class="form-label col-2"></label>
+                <div class="formControls col-7">
+                    <input class="btn btn-primary radius" type="button" id="Add" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">&nbsp;&nbsp;
+                    <input class="btn btn-primary radius reset" type="button" onclick="CloseArt()" value="&nbsp;关闭&nbsp;">
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <script src="/lib/jquery-1.10.2.js"></script>
+    
+    <script type="text/javascript" src="/lib/Validform/5.3.2/Validform.js"></script>
+    <script type="text/javascript" src="/lib/Validform/5.3.2/passwordStrength-min.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script type="text/javascript" src="~/lib/js/Common.js"></script>
+    <script src="/lib/js/amazeui.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //var chkcount = 0;
+            //var chkstring = "";
+            //$("#Add").click(function () {
+            //    var chk = $(":checkbox");
+
+            //    for (var i = 0; i < chk.length; i++) {
+            //        if (chk[i].checked) {
+            //            chkcount++;
+            //            chkstring += chk[i].value + ",";
+            //        }
+            //    }
+
+            //});
+
+            //用户添加及表单验证
+            var demo = $("#form-admin-add").Validform({
+                tiptype: 2,
+                btnSubmit: "#Add",
+                usePlugin: {
+                    passwordstrength: {
+                        minLen: 6,
+                        maxLen: 18
+                    }
+                },
+                datatype: {
+                    //"zh1-6": /^[\u4E00-\u9FA5\uf900-\ufa2d]{1,6}$/,
+                    "account": function (gets, obj, curform, regxp) {
+                        var reg = /^[a-zA-Z][a-zA-Z0-9]{1,15}$/;
+                        if (!reg.test(gets)) {
+                            return "以字母开头,由英文字母和数字组成的2-16位字符,";
+                        }
+
+                    }
+                },
+                callback: function () {
+                    $.ajax({
+                        type: "post",
+                        url: "/Admin/Edit",
+                        //data: {
+                        //    UserID: $("#UserID").val(), LoginName: $("#LoginName").val(), UserName: $("#UserName").val(),
+                        //    LoginPassword: $("#LoginPassword").val(), RoleIDString: chkstring
+                        //},
+                        data: {
+                            UserID: $("#UserID").val(), LoginName: $("#LoginName").val(), UserName: $("#UserName").val(),
+                            LoginPassword: $("#LoginPassword").val()
+                        },
+                        dataType: "json",
+                        timeout: 20000,
+                        success: function (r) {
+
+                            if (r.status == "y") {
+                                layer.msg(r.info, { icon: 1, time: 2000 }, function () {
+                                    //var index = parent.layer.getFrameIndex(window.name);
+                                    //parent.layer.close(index);
+                                    var list = top.dialog.list;
+                                    for (var i in list) {
+                                        list[i].close();
+                                    };
+
+                                });
+
+                            }
+                            else {
+
+                                layer.msg(r.info, { icon: 2, time: 2000 }, function () {
+                                    var list = top.dialog.list;
+                                    for (var i in list) {
+                                        list[i].close();
+                                    };
+
+                                    //var index = parent.layer.getFrameIndex(window.name);
+                                    //parent.layer.close(index);
+                                });
+                            }
+
+                        }
+                    });
+
+                    return false;
+
+                }
+            });
+            //demo.addrule([{
+            //    ele: ".input-text:eq(0)",
+            //    datatype: "zh2-4",
+            //}, {
+            //    ele: ".input-text:eq(1)",
+            //    datatype: "account",
+            //    ajaxurl: "/admin/registname?userid=" + $("#userid").val(),
+            //}]);
+
+            demo.addRule([{
+                ele: ".input-text:eq(1)",
+                datatype: "account",
+                ajaxurl: "/Admin/RegistName?UserID=" + $("#UserID").val(),
+            }]);
+
+        });
+    </script>
+</body>
+</html>

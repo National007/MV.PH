@@ -1,0 +1,120 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity
+@model ForbiddenWordEntity
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+
+    <link href="/lib/css/amazeui.css" rel="stylesheet" />
+    <title>Independent</title>
+</head>
+<body>
+    <nav class="breadcrumb">
+        <i class="Hui-iconfont">&#xe67f;</i> 首页
+        <span class="c-gray en">&gt;</span> <span id="parentMenu"></span>
+        <span class="c-gray en">&gt;</span> <span id="ChildrenMenu"></span>
+        <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新">
+            <i class="Hui-iconfont">&#xe68f;</i>
+        </a>
+    </nav>
+
+    <div class="pd-20">
+        <form method="post" class="form form-horizontal" id="form1">
+            <input type="hidden" id="ForbiddenWordID" name="ForbiddenWordID" value="@Model.ForbiddenWordID" />
+            <div class="row cl">
+                <label class="form-label col-1">屏蔽词：</label>
+                <div class="formControls col-11">
+                    <textarea name="ForbiddenWord" style="height:150px;" id="ForbiddenWord" class="textarea" placeholder="如有多个屏蔽词,请用|符号分隔" onkeyup="textarealength(this, 250)" datatype="*0-250" errormsg="描述字符长度为0-250位">@Model.ForbiddenWord</textarea>
+                    <p class="textarea-numberbar"><em class="textarea-length">0</em>/250</p>
+                </div>
+            </div> 
+
+            <div class="row cl">
+                <label class="form-label col-1"></label>
+                <div class="formControls col-10">
+                    <input class="btn btn-primary radius" type="button" id="Add" value="&nbsp;&nbsp;保存&nbsp;&nbsp;">
+                </div>
+            </div>
+            </form>
+        </div>
+             <script src="/lib/jquery-1.10.2.js"></script>
+            <script type="text/javascript" src="/lib/Validform/5.3.2/Validform.js"></script>
+            <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+            <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+            <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+            <script src="/lib/jquery.form.js"></script>
+            <script src="/lib/js/Common.js"></script>
+            <script type="text/javascript">
+                
+                //$(function () {
+
+                //    $("input").keyup(function () {
+                //        var txt = $(this).val();
+                //        var vartag = "666";
+                //        var $t = txt.replace(vartag, "**");
+                //        $(this).val($t);
+                //    });
+
+                //    $("textarea").keyup(function () {
+                //        var txt = $(this).val();
+                //        var vartag = "123456|1|3";
+                //        var var_split = vartag.toString().split('|');
+                //        var $t = txt;
+                //        for (var i = 0; i < var_split.length; i++) {
+                //            if (txt.includes(var_split[i])) {
+                //                //alert(var_split[i]);
+                //                $t = txt.replace(var_split[i], "**");
+                //            }
+                //        }
+                //        $(this).val($t);
+                //    });
+
+                //});
+                //用户添加及表单验证
+                var demo = $("#form1").Validform({
+                    tiptype: 2,
+                    btnSubmit: "#Add",
+                    callback: function () {
+                        $('#form1').ajaxSubmit({
+                            type: "post",
+                            url: "/System/Independent",
+                            dataType: "json",
+                            timeout: 20000,
+                            success: function (r) {
+
+                                if (r.status == "y") {
+                                    layer.msg(r.info, { icon: 1, time: 2000 }, function () {
+                                        location.href = location.href;
+                                    });
+
+                                }
+                                else {
+
+                                    layer.msg(r.info, { icon: 2, time: 2000 }, function () {
+                                        location.href = location.href;
+                                    });
+                                }
+
+                            }
+                        });
+
+                        return false;
+
+                    }
+                });
+            </script>
+</body>
+</html>

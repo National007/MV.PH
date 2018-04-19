@@ -1,0 +1,223 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity;
+@using MV.PH.WebAdmin.Model.PageHelp;
+@using MV.PH.WebAdmin.Model.Admin;
+@model PageListModel<RoleEntity>
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="~/lib/artDialog/ui_dialog.css" rel="stylesheet" />
+    <link href="/lib/css/amazeui.css" rel="stylesheet" />
+    <link href="/lib/css/pagination.css" rel="stylesheet" />
+    <title>角色管理列表</title>
+</head>
+<body>
+    @{ 
+        var user = ViewData["UserEntity"] as UserEntity;
+    }
+
+    <nav class="breadcrumb">
+        
+        用户【@user.UserName】的角色
+        
+        <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新">
+            <i class="Hui-iconfont">&#xe68f;</i>
+        </a>
+    </nav>
+
+    <div class="pd-20">
+        <div class="cl bg-1 bk-gray mt-20" style="border:0px;background:#fff; border-bottom:1px solid #eee;margin-bottom:10px; padding-bottom:5px;">
+            <div class="am-btn-group" data-am-button="">
+
+                <a class="am-btn am-btn-default am-btn-xs" href="/Admin/AdminManager">
+                    <input type="radio" name="options" id="option1">
+                    <i class="Hui-iconfont">&#xe6dc;</i> 返回列表页
+                </a>
+
+                <a class="am-btn am-btn-default am-btn-xs" onclick="DeleteAll()">
+                    <input type="radio" name="options" id="option1">
+                    <i class="Hui-iconfont">&#xe6e2;</i> 批量剔除
+                </a>
+
+                <a class="am-btn am-btn-default am-btn-xs" onclick="showartDialog('添加用户【@user.UserName】的角色', '/Admin/Role?UserID=@user.UserID','600','400')" href="javascript:;">
+                    <input type="radio" name="options" id="option2">
+                    <i class="Hui-iconfont">&#xe600;</i> 加入新角色
+                </a>
+
+            </div>
+        </div>
+        <div style="padding-bottom:50px;">
+            <table class="table table-border table-bordered table-hover table-bg" style="margin-top:10px;">
+                <thead>
+                    <tr class="text-c">
+                        <th width="50">
+                            <input type="checkbox" name="online" id="online" value="" onclick="checkAll(this)" />
+                        </th>
+                        <th width="60">序号</th>
+                        <th width="150">角色名称</th>
+                        <th>描述</th>
+                        <th width="180">权限管理</th>
+                        <th width="80">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+
+                        if (Model.Data.Count < 1)
+                        {
+                            <tr class="text-c">
+                                <td colspan="5" style="text-align:center;font-size:14px;color:#666;">暂无记录!</td>
+                            </tr>
+                        }
+                        var count = (Model.CurrentPageIndex - 1) * Model.PageSize;
+
+                        foreach (var item in Model.Data)
+                        {
+                            count++;
+                            <tr class="text-c">
+                                <td><input type="checkbox" value="@item.RoleID"></td>
+                                <td>@count</td>
+                                <td>@item.RoleName</td>
+                                <td style="text-align:left">@item.RoleDescription</td>
+                                <td>
+                                    <a href="javascript:;" onclick="showartDialog('菜单权限', '/Admin/Menu?RoleID=@item.RoleID','620','500')">菜单权限</a>&nbsp;&nbsp;&nbsp;
+                                    <a href="javascript:;" onclick="showartDialog('栏目权限', '/Admin/Column?RoleID=@item.RoleID','620','650')">栏目权限</a>
+
+                                </td>
+                                <td class="f-14">
+                                    <a title="剔除角色" href="javascript:;" onclick="admin_role_del('@item.RoleID')" class="ml-5" style="text-decoration:none">
+                                       剔除角色
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+
+            <div class="pagelist">
+                <div id="PageContent" class="default">
+                    <span>共@(Model.TotalItemCount)记录</span>
+                    @(new HtmlString(PageUIDisplay.Display(Model.CurrentPageIndex, Model.TotalPageCount, "", 8, "")))
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script src="/lib/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script type="text/javascript" src="~/lib/js/Common.js"></script>
+    <script src="/lib/artDialog/dialog_plus_min.js"></script>
+    <script type="text/javascript">
+
+        /*资讯-批量删除*/
+        function DeleteAll() {
+            var chk = $(":checkbox");
+            var chkcount = 0;
+            var chkstring = "";
+            for (var i = 0; i < chk.length; i++) {
+                if (chk[i].checked && chk[i].id != "online") {
+                    chkcount++;
+                    chkstring += chk[i].value + ",";
+                }
+            }
+            if (chkcount > 0) {
+                top.dialog({
+                    title: '提示',
+                    width: "300px",
+                    content: '您已选中' + chkcount + '条记录,确认要剔除吗？',
+                    okValue: '确定',
+                    ok: function () {
+                        var v = {};
+                        v.UserID = "@user.UserID";
+                        v.RoleIDString = chkstring;
+                        $.post("/Admin/Delete_UserRole", v, function (r) {
+
+                            if (r.Status > 0) {
+                                var d = dialog({ content: "成功剔除" + chkcount + "个角色", width: "100px" }).show();
+                                setTimeout(function () {
+                                    location.href = location.href;
+                                    d.close().remove();
+                                }, 2000);
+
+                            }
+                            else {
+                                var d = dialog({ content: r.Message, width: "200px" }).show();
+                                setTimeout(function () {
+                                    d.close().remove();
+                                }, 3000);
+
+                            }
+                        });
+                    },
+                    cancelValue: '取消',
+                    cancel: function () { }
+                }).showModal();
+
+            }
+            else {
+                ///正上方弹出提示
+                layer.msg('请选择要剔除的数据', {
+                    offset: 0,
+                    shift: 6,
+                    time: 3000
+                });
+            }
+        }
+
+        /*管理员-角色-删除*/
+        function admin_role_del(id) {
+
+            top.dialog({
+                title: '提示',
+                width: "300px",
+                content: '角色剔除须谨慎，确认要剔除吗？',
+                okValue: '确定',
+                ok: function () {
+
+                    var v = {};
+                    v.UserID = "@user.UserID";
+                    v.RoleIDString = id;
+                    $.post("/Admin/Delete_UserRole", v, function (r) {
+
+                        if (r.Status > 0) {
+                            var d = dialog({ content: "角色剔除成功", width: "100px" }).show();
+                            setTimeout(function () {
+                                location.href = location.href;
+                                d.close().remove();
+                            }, 2000);
+
+                        }
+                        else {
+                            var d = dialog({ content: r.Message, width: "200px" }).show();
+                            setTimeout(function () {
+                                d.close().remove();
+                            }, 3000);
+
+                        }
+                    });
+                },
+                cancelValue: '取消',
+                cancel: function () { }
+            }).showModal();
+        }
+    </script>
+</body>
+</html>

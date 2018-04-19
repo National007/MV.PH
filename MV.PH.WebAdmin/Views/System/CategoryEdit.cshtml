@@ -1,0 +1,112 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity
+@model DictionaryCategoryEntity
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>内容类别</title>
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="~/lib/artDialog/ui_dialog.css" rel="stylesheet" />
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+
+</head>
+<body>
+
+    <div>
+        <form action="" method="post" class="form form-horizontal" id="form1">
+            <input type="hidden" id="DictionaryCategoryID" name="DictionaryCategoryID" value="@Model.DictionaryCategoryID" />
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>分类名称：</label>
+                <div class="formControls col-7">
+                    <input type="text" class="input-text" value="@Model.CategoryName" placeholder="分类名称" id="CategoryName" name="CategoryName" datatype="*" nullmsg="分类名称不能为空">
+                </div>
+                <div class="col-3"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2">物理名称：</label>
+                <div class="formControls col-7">
+                    <input type="text" class="input-text" value="@Model.PhysicsName" placeholder="物理名称" id="PhysicsName" name="PhysicsName">
+                </div>
+                <div class="col-3"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2">备注：</label>
+                <div class="formControls col-7">
+                    <textarea name="Remark" id="Remark" class="textarea" placeholder="说点什么..." onkeyup="textarealength(this, 200)" datatype="*0-200" errormsg="备注字符长度为0-200位">@Model.Remark</textarea>
+                    <p class="textarea-numberbar"><em class="textarea-length">0</em>/200</p>
+                </div>
+                <div class="col-3"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"></label>
+                <div class="formControls col-7">
+                    <input class="btn btn-primary radius" type="button" id="Add" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">&nbsp;&nbsp;
+                    <input class="btn btn-primary radius reset" type="button" onclick="CloseArt()" value="&nbsp;关闭&nbsp;">
+                </div>
+            </div>
+
+        </form>
+    </div>
+     <script src="/lib/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/lib/Validform/5.3.2/Validform.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script src="/lib/jquery.form.js"></script>
+    <script type="text/javascript" src="/lib/js/Common.js"></script>
+    <script src="/lib/artDialog/dialog_plus_min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //用户添加及表单验证
+            var demo = $("#form1").Validform({
+                tiptype: 2,
+                btnSubmit: "#Add",
+                //btnReset: "reset",
+                callback: function () {
+                    $('#form1').ajaxSubmit({
+                        type: "post",
+                        url: "/System/CategoryEdit",
+                        dataType: "json",
+                        timeout: 20000,
+                        success: function (r) {
+
+                            if (r.status == "y") {
+                                layer.msg(r.info, { icon: 1, time: 2000 }, function () {
+                                    var list = top.dialog.list;
+                                    for (var i in list) {
+                                        list[i].close();
+                                    };
+                                });
+
+                            }
+                            else {
+
+                                layer.msg(r.info, { icon: 2, time: 2000 }, function () {
+                                    var list = top.dialog.list;
+                                    for (var i in list) {
+                                        list[i].close();
+                                    };
+                                });
+                            }
+
+                        }
+                    });
+
+                    return false;
+
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>

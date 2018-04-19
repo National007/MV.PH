@@ -1,0 +1,28 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>可编辑的下拉框</title>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="jquery.combox.js"></script>
+<link rel="stylesheet" href="styles/style.css" type="text/css"/>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#combox').combox({datas:['选项一','选项二','选项三']});
+})
+</script>
+</head>
+<body>
+<span style="display:inline-block;position:relative" class="combox_border">
+	<input type="text" class="combox_input"/><font class="ficomoon icon-angle-bottom combox_button" style="display:inline-block"></font>
+	<ul style="position:absolute;top:29px;left:-1px" class="combox_select">
+		<li><a href="javascript:void(0)">选项一</a></li>
+		<li><a href="javascript:void(0)">选项二</a></li>
+		<li><a href="javascript:void(0)">选项三</a></li>
+		<li><a href="javascript:void(0)">选项四</a></li>
+	</ul>
+</span>
+
+<span id="combox"></span>
+</body>
+</html>

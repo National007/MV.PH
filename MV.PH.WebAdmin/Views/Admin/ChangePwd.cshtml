@@ -1,0 +1,158 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,member-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <title>修改密码</title>
+    <link href="/lib/css/commonloading.css" rel="stylesheet" />
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/icheck/icheck.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+
+    <link href="~/lib/css/amazeui.css" rel="stylesheet" />
+</head>
+<body>
+    <div>
+        <form action="" method="post" class="form form-horizontal" id="form-admin-add">
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>旧密码:</label>
+                <div class="formControls col-4">
+                    <input type="password" class="input-text" placeholder="密码" id="LoginPassword" name="LoginPassword" nullmsg="请输入旧密码">
+
+                </div>
+                <div class="col-6">
+                    @*<span class="Validform_checktip"><font class="font_vaild">*以字母开头,由英文字母和数字组成的6-16位字符！</font></span>*@
+                </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>新密码:</label>
+                <div class="formControls col-4">
+                    <input type="password" class="input-text" placeholder="新密码" @*ajaxurl="/Admin/RegistName"*@ id="newPwd" name="newPwd" nullmsg="请输入新密码">
+
+                </div>
+                <div class="col-6">
+                    @*<span class="Validform_checktip"><font class="font_vaild">*以字母开头,由英文字母和数字组成的6-16位字符！</font></span>*@
+                </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>确认密码:</label>
+                <div class="formControls col-4">
+                    <input type="password" class="input-text" placeholder="确认密码" id="enterPwd" name="enterPwd" recheck="newPwd" errormsg="两次输入的密码不一致！" nullmsg="请输入确认密码">
+
+                </div>
+                <div class="col-6">
+                    @*<span class="Validform_checktip"><font class="font_vaild">*以字母开头,由英文字母和数字组成的6-16位字符！</font></span>*@
+                </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"></label>
+                <div class="formControls col-4">
+                    <input class="btn btn-primary radius" type="button" id="Add" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">&nbsp;&nbsp;
+                    <input class="btn btn-primary radius reset" onclick="CloseArt()" type="button" value="&nbsp;&nbsp;关闭&nbsp;&nbsp;">
+                </div>
+            </div>
+
+        </form>
+    </div>
+     <script src="/lib/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/lib/Validform/5.3.2/Validform.js"></script>
+    <script type="text/javascript" src="/lib/Validform/5.3.2/passwordStrength-min.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script type="text/javascript" src="~/lib/js/Common.js"></script>
+    <script src="/lib/js/CommonLoding.js"></script>
+    <script type="text/javascript">
+        //var IsEnable;
+        //var Sex;
+        $(function () {
+
+            //用户添加及表单验证
+            var demo = $("#form-admin-add").Validform({
+                tiptype: 2,
+                btnSubmit: "#Add",
+                //datatype: {
+                //    "account": function (gets, obj, curform, regxp) {
+                //        var reg = /^[a-zA-Z][a-zA-Z0-9]{5,15}$/;
+                //        if (!reg.test(gets)) {
+                //            return "以字母开头,由英文字母和数字组成的6-16位字符,";
+                //        }
+                //    }
+                //},
+                callback: function () {
+                    $.ajax({
+                        type: "post",
+                        url: "/Admin/UpdatePwd",
+                        data: {
+                            LoginPassword: $("#LoginPassword").val(),
+                            enterPwd: $("#enterPwd").val()
+                        },
+                        dataType: "json",
+                        timeout: 20000,
+                        success: function (r) {
+
+                            if (r.status == "y") {
+                                parent.dialog({
+                                    title: '提示',
+                                    content: r.info,
+                                    okValue: '确定',
+                                    ok: function () {
+                                        var list = top.dialog.list;
+                                        for (var i in list) {
+                                            list[i].close();
+                                        };
+                                        //layer.load(2);
+                                        CommonPerson.Base.LoadingPic.FullScreenShow("正在退出系统…");
+                                        parent.location.href = '/Login'
+                                    }
+                                }).showModal();
+
+                            }
+                            else {
+
+                                layer.msg(r.info, { icon: 2, time: 2000 }, function () {
+                                });
+                            }
+
+                        }
+                    });
+
+                    return false;
+
+                }
+            });
+            demo.addRule([{
+                ele: "#LoginPassword",
+                datatype:"*",
+                //datatype: "account",
+                ajaxurl: "/Admin/GetPassword",
+            }, {
+                ele: "#newPwd",
+                //datatype: "account",
+                datatype: "*",
+            },
+            {
+                ele: "#enterPwd",
+                //datatype: "account",
+                datatype: "*",
+            }
+            ]);
+
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+﻿
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,initial-scale=1.0,user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>上传附件</title>
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/style.css" rel="stylesheet" />
+    <link href="/lib/artDialog/ui_dialog.css" rel="stylesheet" />
+
+    <script src="~/lib/artDialog/dialog_plus_min.js"></script>
+    <script src="/lib/jquery-1.10.2.js"></script>
+    <script src="/lib/js/webuploader.min.js"></script>
+    <script src="/lib/js/uploader2.js"></script>
+
+    <style type="text/css">
+         .font_vaild {
+            font-size: 12px;
+            color: #999999;
+        }
+    </style>
+    <script type="text/javascript">
+    var api = top.dialog.get(window); //获取父窗体对象
+    //页面加载完成执行
+    $(function () {
+        //设置按钮及事件
+        api.button([{
+            value: '确定',
+            callback: function () {
+                execAttachHtml();
+                return false;
+            },
+            autofocus: true
+        }, {
+            value: '取消',
+            callback: function () { }
+        }]);
+
+        //初始化上传控件 默认文件大小10MB
+        $(".upload-attach").InitUploader({ filesize: "10240", sendurl: "/action/common.ashx", swf: "/js/Uploader.swf", filetypes: "gif,jpg,png,bmp,rar,zip,doc,xls,txt,jpeg,docx,xlsx,mp4,mp3,ppt,wav" });
+        //修改状态，赋值给表单
+        if ($(api.data).length > 0) {
+            var parentObj = $(api.data).parent();
+            var filePath = parentObj.find("input[name='hid_attach_filepath']").val();
+            var fileName = parentObj.find("input[name='hid_attach_filename']").val();
+            var fileSize = parentObj.find("input[name='hid_attach_filesize']").val();
+            var fileType = parentObj.find("input[name='hid_attach_filetype']").val();
+            $(".rule-multi-radio div a").eq(0).trigger("click"); //触发事件
+            $("#txtFileName").val(fileName);
+            $("#hidFilePath").val(filePath);
+            $("#hidFileSize").val(fileSize);
+            $("#hidFileType").val(fileType);
+            $(".dl-attach-box").hide();
+            $(".dl-attach-box").eq(0).show();
+        }
+
+    });
+
+    //创建附件节点
+    function execAttachHtml() {
+        if ($("#hidFilePath").val() == "" || $("#hidFileSize").val() == "" || $("#txtFileName").val() == "") {
+            top.dialog({
+                title: '提示',
+                content: '没有找到已上传附件，请上传！',
+                okValue: '确定',
+                ok: function () { }
+            }).showModal(api);
+            return false;
+
+        }
+        appendAttachHtml($("#txtFileName").val(), $("#hidFilePath").val(), $("#hidFileType").val(), $("#hidFileSize").val()); //插件节点
+    }
+
+    //创建附件节点的HTML
+    function appendAttachHtml(fileName, filePath, fileType, fileSize) {
+        if ($(api.data).length > 0) {
+            var parentObj = $(api.data).parent();
+            parentObj.find("input[name='hid_attach_filename']").val(fileName);
+            parentObj.find("input[name='hid_attach_filepath']").val(filePath);
+            parentObj.find("input[name='hid_attach_fileSize']").val(fileSize);
+            parentObj.find(".title").text(fileName);
+            parentObj.find(".info .ext").text(fileType);
+            parentObj.find(".info .size").text(fileSize);
+            api.close().remove();
+        } else {
+            var liHtml = '<li>'
+            + '<input name="hid_attach_id" type="hidden" value="0" />'
+            + '<input name="hid_attach_filename" type="hidden" value="' + fileName + '" />'
+            + '<input name="hid_attach_filepath" type="hidden" value="' + filePath + '" />'
+            + '<input name="hid_attach_filesize" type="hidden" value="' + fileSize + '" />'
+            + '<input name="hid_attach_filetype" type="hidden" value="' + fileType + '" />'
+            + '<i class="icon"></i>'
+            + '<a href="javascript:;" onclick="delAttachNode(this);" class="del" title="删除附件"></a>'
+            + '<a href="javascript:;" onclick="showAttachDialog(this);" class="edit" title="更新附件"></a>'
+            + '<div class="title" title="' + fileName + '">' + fileName + '</div>'
+            + '<div class="info">类型：<span class="ext">' + fileType + '</span> 大小：<span class="size">' + fileSize + '</span>'
+            + '</li>';
+            api.close(liHtml).remove();
+        }
+    }
+    </script>
+</head>
+
+<body>
+    <form method="post" action="" id="form1">
+
+        <div class="row cl">
+            <label class="form-label col-2"><span class="c-red">*</span>附件上传：</label>
+            <div class="formControls col-8">
+                <input type="hidden" id="hidFilePath" class="upload-path" />
+                <input type="hidden" id="hidFileSize" class="upload-size" />
+                <input type="hidden" id="hidFileType" class="upload-type" />
+                <input type="text" id="txtFileName" class="input txt upload-name" style="height:32px;width:240px;" />
+                <div class="upload-box upload-attach">
+                </div>
+            </div>
+            <div class="col-4"></div>
+        </div>
+
+        <div class="row cl">
+            <label class="form-label col-2"></label>
+            <div class="formControls col-5">
+                <span class="font_vaild">提示：上传文件后，可更改附件名称。允许文件类型zip、docx、image*/、xlsx</span>
+            </div>
+        </div>
+
+    </form>
+
+</body>
+</html>

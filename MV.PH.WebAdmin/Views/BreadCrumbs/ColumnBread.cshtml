@@ -1,0 +1,30 @@
+﻿@using MV.PH.WebAdmin.Model.Menu
+@model BreadCrumbsModel
+
+<nav class="breadcrumb">
+    上级栏目 <span class="c-gray en">&gt;</span>
+    
+    @{
+        foreach (var item in Model.BreadCrumbList)
+        {
+            if (item.IsParent)
+            {
+                <a href="/Column/List">【@item.Name】</a>
+                if (Model.BreadCrumbList.Count > 1)
+                {
+                    <span class="c-gray en">&gt;</span>
+                }
+            }
+            else
+            {
+                <a href="/Column/ChildrenList?ColumnID=@item.Id">【@item.Name】</a>
+            }
+        }
+    }
+
+    
+    <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新">
+        <i class="Hui-iconfont">&#xe68f;</i>
+    </a>
+</nav>
+

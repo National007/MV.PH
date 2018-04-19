@@ -1,0 +1,25 @@
+﻿@using MV.PH.WebAdmin.Model.Menu
+@model BreadCrumbsModel
+
+<nav class="breadcrumb">
+    <i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span>
+    @{
+        foreach (var item in Model.BreadCrumbList)
+        {
+            if (Model.BreadCrumbList.Count > 1)
+            {
+                if (item.IsParent)
+                {
+                    @item.Name <span class="c-gray en">&gt;</span>
+                }
+                else
+                {
+                    @item.Name
+                }
+            }
+        }
+    }
+    <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新">
+        <i class="Hui-iconfont"></i>
+    </a>
+</nav>

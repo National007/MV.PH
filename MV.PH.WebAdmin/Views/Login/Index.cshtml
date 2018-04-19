@@ -1,0 +1,187 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.WebAdmin.Inc
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.login.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/commonloading.css" rel="stylesheet" />
+    <title>铭信科技后台管理系统登录页面</title>
+    <LINK rel="Shortcut Icon" href="/images/icon/favicon.png" />
+</head>
+<body>
+    <div class="header">
+        铭信科技后台管理系统登录页面
+    </div>
+    <div class="loginWraper">
+        <div id="loginform" class="loginBox">
+            <form class="form form-horizontal" action="" method="post">
+                <div class="row" style="">
+                    <div class="formControls col-8 col-offset-3">
+                        <span style="color:red" id="msgtips">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row cl">
+                    <label class="form-label col-3"><i class="Hui-iconfont">&#xe60d;</i></label>
+                    <div class="formControls col-6">
+                        <input id="LoginName" name="LoginName" type="text" placeholder="账户" class="input-text size-L">
+                    </div>
+                </div>
+
+                <div class="row cl">
+                    <label class="form-label col-3"><i class="Hui-iconfont">&#xe60e;</i></label>
+                    <div class="formControls col-6">
+                        <input id="LoginPassword" name="LoginPassword" type="password" placeholder="密码" class="input-text size-L">
+                        <input type="text" class="input-text size-L" id="Password" style="display:none;" placeholder="密码" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="formControls col-8 col-offset-3">
+                        <label for="online" style="cursor:pointer" id="jz">
+                            <input type="checkbox" name="online" id="online" value="">
+                            记住我
+                        </label>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+                        <label for="displayPwd" style="cursor:pointer">
+                            <input type="checkbox" name="displayPwd" id="displayPwd">
+                            显示密码
+                        </label>
+
+                        @*[<a href="javascript:window.close()">关闭</a>]
+                            <a title="收藏本页" href="javascript:addFavoritepage(0);">收藏本页</a>
+                            <a title="收藏本站" href="javascript:addFavoritepage('后台管理系统登录页面','/');">收藏本站</a>
+                            [<a href="javascript:;" onclick="setHome(this)">设为首页</a>]*@
+
+                    </div>
+                </div>
+
+
+                <div class="row" id="LoginAgo" style="display:block">
+                    <div class="formControls col-6 col-offset-3">
+                        <input id="login" type="button" onclick="Login();" class="btn btn-success radius size-L" value="&nbsp;登&nbsp;&nbsp;&nbsp;&nbsp;录&nbsp;" />
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <input name="" type="reset" class="btn btn-default radius size-L" value="&nbsp;取&nbsp;&nbsp;&nbsp;&nbsp;消&nbsp;">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="footer">Copyright©  铭信科技公司版权所有</div>
+    <script src="/lib/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script src="/lib/js/CommonLoding.js"></script>
+    <script type="text/javascript">
+
+
+        function Login() {
+            var LoginName = $("#LoginName").val();
+            var pwd = $("#LoginPassword").val();
+            if (LoginName == null || LoginName == "") {
+                $("#msgtips").text("错误提示：用户名不为空");
+                $("#LoginName").focus();
+                return false;
+            }
+            if (pwd == null || pwd == "") {
+                $("#msgtips").text("错误提示：密码不为空");
+                $("#LoginPassword").focus();
+                return false;
+            }
+
+            $.ajax({
+                type: 'post',
+                url: '/Login/Index',
+                dataType: "json",
+                data: { LoginName: LoginName, LoginPassword: pwd },
+                timeout: 10000,
+                beforeSend: function (XMLHttpRequest) {
+                    CommonPerson.Base.LoadingPic.FullScreenShow("正在登录…");
+                },
+                success: function (r) {
+
+                    if (r.Status > 0) {
+                        if (document.getElementById("online").checked) {
+                            setCookie("LoginName", LoginName, 1);
+                            setCookie("LoginPassword", pwd, 1);
+                        }
+                        else {
+                            delCookie("LoginName");
+                            delCookie("LoginPassword");
+                        }
+
+                        location.href = "/Default";
+                    } else {
+                        //layer.closeAll('loading');
+                        CommonPerson.Base.LoadingPic.FullScreenHide();
+                        $("#msgtips").text("错误提示：" + r.Message);
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    CommonPerson.Base.LoadingPic.FullScreenHide();
+                    $("#msgtips").text("错误提示：" + errorThrown);
+                }
+            });
+
+        }
+
+        onkeydown = function () {
+            if (event.keyCode == "13") {
+                Login();
+            }
+        }
+        $(function () {
+           
+            var v_username = getCookie("LoginName");
+            var v_pwd = getCookie("LoginPassword");
+            //alert(v_username+"\r"+v_pwd);
+            if (v_username != null && v_pwd != null) {
+                $("#online").attr("checked", true);
+                $("#LoginName").val(v_username);
+                $("#LoginPassword").val(v_pwd);
+            }
+
+            var i = 0;
+            $("#displayPwd").click(function () {
+                i++;
+                if (i % 2 == 0) {
+                    //alert("未选中");
+                    // 复选框未选中
+                    $("#LoginPassword").show();
+                    $("#Password").hide();
+                    $("#LoginPassword").val($("#Password").val());
+
+                }
+                else {
+                    //alert("选中");
+                    // 复选框选中
+                    $("#LoginPassword").hide();
+                    $("#Password").show();
+                    $("#Password").val($("#LoginPassword").val());
+
+                }
+            });
+
+            $("#Password").keyup(function () {
+                $("#LoginPassword").val($("#Password").val());
+            });
+
+        });
+
+    </script>
+</body>
+</html>

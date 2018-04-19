@@ -1,0 +1,239 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity;
+@using Lib.Data;
+@using MV.PH.WebAdmin.Model.PageHelp;
+@using MV.PH.WebAdmin.Model.Article;
+@model PageListModel<P_ArticleEntity>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/pagination.css" rel="stylesheet" />
+    <link href="/lib/css/amazeui.css" rel="stylesheet" />
+    <link href="~/lib/artDialog/ui_dialog.css" rel="stylesheet" />
+    <title>资讯列表</title>
+</head>
+<body>
+    <div>
+        <form id="form1" action="">
+            <input type="hidden" id="ArticleInfoID" name="ArticleInfoID" value="@ViewBag.ArticleInfoID" />
+            <div class="text-c" style="text-align:left;margin-bottom:20px;">
+                <select class="select_Column select-box inline" id="ColumnTreeID" name="ColumnTreeID">
+                    <option value="">所有类别</option>
+                    @{
+                        SqlDataAccess sda = new SqlDataAccess("default");
+
+                        var list = ViewData["list"] as List<ColumnEntity>;
+
+                        foreach (var item in list)
+                        {
+                            <option value="@item.ColumnTreeID" @(ViewBag.ColumnTreeID == item.ColumnTreeID ? "selected" : "")>&nbsp; &nbsp;    ├@item.ColumnName</option>
+                            string sql = string.Format(@"select ColumnID,ColumnTreeID,ColumnName from T_Column where ColumnParentID='{0}' order by SortNumber", item.ColumnID);
+                            List<ColumnEntity> Column = sda.FindEntities<ColumnEntity>(sql);
+                            foreach (var childColumn in Column)
+                            {
+                                <option value="@childColumn.ColumnTreeID" @(ViewBag.ColumnTreeID == childColumn.ColumnTreeID ? "selected" : "")>&nbsp; &nbsp;  &nbsp; &nbsp;    ├  @childColumn.ColumnName</option>
+
+                                string sql2 = string.Format(@"select ColumnID,ColumnTreeID,ColumnName from T_Column where ColumnParentID='{0}' order by SortNumber", childColumn.ColumnID);
+                                List<ColumnEntity> Column2 = sda.FindEntities<ColumnEntity>(sql2);
+                                foreach (var childColumn2 in Column2)
+                                {
+                                    <option value="@childColumn2.ColumnTreeID" @(ViewBag.ColumnTreeID == childColumn2.ColumnTreeID ? "selected" : "")>&nbsp; &nbsp;  &nbsp; &nbsp;  &nbsp; &nbsp;    ├  @childColumn2.ColumnName</option>
+                                }
+                            }
+                        }
+                    }
+
+                </select>
+                &nbsp;&nbsp;
+                <input type="text" name="ArticleTitle" id="ArticleTitle" value="@ViewBag.ArticleTitle" placeholder="标题名称" style="width:250px" class="input-text">
+
+                <button class="btn btn-success" type="submit" style="height:31px;"><i class="Hui-iconfont">&#xe665;</i> 搜索</button>
+            </div>
+        </form>
+
+        <form id="form2" action="">
+            <div>
+                <table class="table table-border table-bordered table-bg table-hover">
+                    <thead>
+                        <tr class="text-c">
+                            <th width="50">
+                                <input type="checkbox" name="online" id="online" value="" onclick="checkAll(this)" />
+                            </th>
+                            <th>标题</th>
+                            <th width="100">分类</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @{
+                        if (Model.Data.Count < 1)
+                        {
+                                <tr class="text-c">
+                                    <td colspan="3" style="text-align:center;font-size:14px;color:#666;">暂无记录!</td>
+                                </tr>
+                        }
+
+                        foreach (var item in Model.Data)
+                        {
+                                <tr class="text-c">
+                                    <td>
+                                        @{
+                                        string state = "";
+                                        var Rrelate = ViewData["RrelateList"] as List<ArticleRrelatedEntity>;
+                                        foreach (var itemRrelate in Rrelate)
+                                        {
+                                            if (itemRrelate.RrelatedArticleInfoID == item.ArticleInfoID)
+                                            {
+                                                state = "checked";
+                                            }
+                                        }
+                                        }
+                                        <input type="checkbox" value="@item.ArticleInfoID" @state />
+                                    </td>
+                                    <td class="text-l">
+                                        <u style="cursor:pointer;" class="text-primary" onClick="article_edit('查看','article-zhang.html','10001')" title="查看">
+                                            <span>
+                                                @item.ArticleTitle
+                                            </span>
+                                        </u>
+
+                                    </td>
+                                    <td>
+                                        @item.ColumnName
+                                    </td>
+                                </tr>
+                                        }
+                        }
+                    </tbody>
+                </table>
+
+                <div class="pagelist">
+                    <div id="PageContent" class="default">
+                        <span>共@(Model.TotalItemCount)记录</span>
+
+                        @(new HtmlString(PageUIDisplay.Display(Model.CurrentPageIndex, Model.TotalPageCount, "", 8, "")))
+                    </div>
+                </div>
+
+
+                <div style="text-align:center;margin-top:65px;">
+                    <input class="btn btn-primary radius" type="button" id="Add" value="&nbsp;保存&nbsp">&nbsp;&nbsp;
+                    <input class="btn btn-primary radius reset" type="button" onclick="CloseArt()" value="&nbsp;关闭&nbsp;">
+                </div>
+
+            </div>
+        </form>
+    </div>
+    
+
+    <style type="text/css">
+        /* IE下的样式 */
+        u span {
+            width: 90%; /*对宽度的定义,根据情况修改*/
+            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        /* FF 下的样式 */
+        u {
+            clear: both;
+        }
+    </style>
+    <script src="/lib/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/My97DatePicker/WdatePicker.js"></script>
+    <script src="/lib/tablesorter/jquery-latest.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script type="text/javascript" src="/lib/js/Common.js"></script>
+    <script src="~/lib/artDialog/dialog_plus_min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var maxCount = 5;  //允许设置最多的相关文章
+            $("#Add").click(function () {
+                var chk = $(":checkbox");
+                var chkcount = 0;
+                var chkstring = "";
+                for (var i = 0; i < chk.length; i++) {
+                    if (chk[i].checked && chk[i].id != "online") {
+                        chkcount++;
+                        chkstring += chk[i].value + ",";
+                    }
+                }
+
+
+
+                //if (chkcount == 0) {
+                //    top.dialog({
+                //        title: '提示',
+                //        content: '没有找到你要关联的文章,请选择要相关的文章',
+                //        okValue: '确定',
+                //        ok: function () { }
+                //    }).showModal();
+                //}
+                //else if (chkcount > maxCount) {
+                //    top.dialog({
+                //        title: '提示',
+                //        content: '相关文章设置不能超过' + maxCount + '篇',
+                //        okValue: '确定',
+                //        ok: function () { }
+                //    }).showModal();
+                //}
+                if (chkcount > maxCount) {
+                    top.dialog({
+                        title: '提示',
+                        content: '相关文章设置不能超过' + maxCount + '篇',
+                        okValue: '确定',
+                        ok: function () { }
+                    }).showModal();
+                }
+                else {
+                    var v = {};
+                    v.RrelatedArticleInfoIDstring = chkstring;
+                    v.ArticleInfoID = "@ViewBag.ArticleInfoID";
+                    $.post("/Article/ArticleRrelatedSet", v, function (r) {
+
+                        if (r.Status > 0) {
+                            layer.msg("文章相关设置成功!", { icon: 1, time: 2000 }, function () {
+                                var list = top.dialog.list;
+                                for (var i in list) {
+                                    list[i].close();
+                                };
+                            });
+
+
+                        }
+                        else {
+
+                            layer.msg(r.Message, { icon: 2, time: 2000 }, function () {
+                                var list = top.dialog.list;
+                                for (var i in list) {
+                                    list[i].close();
+                                };
+                            });
+
+                        }
+                    });
+                    return false;
+                }
+
+            });
+
+        });
+    </script>
+
+</body>
+</html>

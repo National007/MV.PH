@@ -1,0 +1,213 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity
+@using Lib.Data
+@model ArticleInfoEntity
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+
+    <link href="/lib/css/amazeui.css" rel="stylesheet" />
+    <title>Column</title>
+</head>
+<body>
+    <form id="form1" action="" method="post">
+
+        <dl class="permission-list" style="padding:0px;margin:0px;">
+            <dt>
+                <label>
+                    文章隶属栏目
+                </label>
+            </dt>
+            <dd>
+                @{
+                    SqlDataAccess sda = new SqlDataAccess("default");
+                    ///  父栏目列表
+                    var ColumnList = ViewData["ColumnList"] as List<ColumnEntity>;
+                    foreach (var ParentColumn in ColumnList)
+                    {
+                        #region  //父栏目文章
+                        string sqlPermissio1 = string.Format(@"select 
+                                                                    count(0) 
+                                                                from 
+                                                                    T_ArticleInColumn 
+                                                                where ColumnID='{0}' and ArticleInfoID='{1}'", ParentColumn.ColumnID,Model.ArticleInfoID);
+                        int ParentCount = Convert.ToInt32(sda.ExecuteScalar(sqlPermissio1));
+                        #endregion
+                        <dl class="cl permission-list2">
+                            <dt style="margin-top:-10px;">
+                                <label>
+                                    <input type="checkbox" value="@ParentColumn.ColumnID" @(ParentCount > 0 ? "checked" : "")>
+                                    @ParentColumn.ColumnName
+                                </label>
+                            </dt>
+                            @{
+                                //子栏目列表
+                                string sql = string.Format(@"select 
+                                                                   ColumnID,ColumnName 
+                                                             from 
+                                                                   T_Column 
+                                                             where ColumnParentID='{0}' and IsEnable=1 
+                                                                    and ColumnID <> '{1}'
+                                                             order by SortNumber", ParentColumn.ColumnID,Model.ColumnID);
+                                List<ColumnEntity> ChildrenColumn = sda.FindEntities<ColumnEntity>(sql);
+
+
+                                if (ChildrenColumn.Count > 0)
+                                {
+                                    <dd style="min-width:450px">
+
+                                        @{
+                                            foreach (var item in ChildrenColumn)
+                                            {
+                                                #region  //子栏目文章
+                                                string sqlPermission2 = string.Format(@"select 
+                                                                                            count(0) 
+                                                                                        from 
+                                                                                            T_ArticleInColumn 
+                                                                                        where ColumnID='{0}' and ArticleInfoID='{1}'", item.ColumnID,Model.ArticleInfoID);
+
+                                                
+                                                int ChildrentCount = Convert.ToInt32(sda.ExecuteScalar(sqlPermission2));
+                                                #endregion
+                                                <label>
+                                                    <input type="checkbox" value="@item.ColumnID" @(ChildrentCount > 0 ? "checked" : "")>
+                                                    @item.ColumnName
+                                                </label>
+                                            }
+                                        }
+
+                                    </dd>
+                                            }
+                            }
+
+                        </dl>
+                                            }
+                }
+
+
+
+            </dd>
+        </dl>
+
+        <div style="text-align:center;margin-top:15px;">
+            <input class="btn btn-primary radius" type="button" id="Add" value="&nbsp;保存&nbsp">&nbsp;&nbsp;
+            <input class="btn btn-primary radius reset" type="button" onclick="CloseArt()" value="&nbsp;关闭&nbsp;">
+        </div>
+
+    </form>
+    <script src="/lib/jquery-1.10.2.js"></script>
+    
+    <script type="text/javascript" src="/lib/Validform/5.3.2/Validform.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script type="text/javascript" src="~/lib/js/Common.js"></script>
+    <script>
+            //function textarea(obj, maxlength) {
+            //    var v = $(obj).val();
+            //    var l = v.length;
+            //    if (l > maxlength) {
+
+            //        v = v.substring(0, maxlength);
+            //        $(obj).val(v);
+            //    }
+            //    $(obj).parent().find(".textarea-length").text(v.length);
+            //}
+
+            $(function () {
+                var chkcount = 0;
+                var chkstring = "";
+                $("#Add").click(function () {
+                    var chk = $(":checkbox");
+
+                    for (var i = 0; i < chk.length; i++) {
+                        if (chk[i].checked) {
+                            chkcount++;
+                            chkstring += chk[i].value + ",";
+                        }
+                    }
+
+                });
+
+
+                //角色添加及表单验证
+                var demo = $("#form1").Validform({
+                    tiptype: 2,
+                    btnSubmit: "#Add",
+                    callback: function () {
+                        $.ajax({
+                            type: "post",
+                            url: "/Article/MultiArticleInColumn",
+                            data: {
+                                ArticleID:"@Model.ArticleInfoID",
+                                ColumnIDstring: chkstring
+                            },
+                            dataType: "json",
+                            timeout: 20000,
+                            success: function (r) {
+                                if (r.Status > 0) {
+                                    
+                                    layer.msg("该文章已成功复制到"+chkcount+"个栏目", { icon: 1, time: 1000 }, function (index) {
+                                        
+                                        var list = top.dialog.list;
+                                        for (var i in list) {
+                                            list[i].close();
+                                        };
+                                    });
+
+                                }
+                                else {
+                                    //var d = dialog({ content: r.Message, width: "200px" }).show();
+                                    //setTimeout(function () {
+                                    //    d.close().remove();
+                                    //}, 3000);
+                                    layer.msg(r.Message, { icon: 2, time: 1000 }, function (index) {
+                                        var list = top.dialog.list;
+                                        for (var i in list) {
+                                            list[i].close();
+                                        };
+                                    });
+                                }
+                            }
+                        });
+
+                        return false;
+
+                    }
+                });
+
+
+                //$(".permission-list dt input:checkbox").click(function () {
+                //    $(this).closest("dl").find("dd input:checkbox").prop("checked", $(this).prop("checked"));
+                //});
+                //$(".permission-list2 dd input:checkbox").click(function () {
+                //    var l = $(this).parent().parent().find("input:checked").length;
+                //    var l2 = $(this).parents(".permission-list").find(".permission-list2 dd").find("input:checked").length;
+                //    if ($(this).prop("checked")) {
+                //        $(this).closest("dl").find("dt input:checkbox").prop("checked", true);
+                //        $(this).parents(".permission-list").find("dt").first().find("input:checkbox").prop("checked", true);
+                //    }
+                //    else {
+                //        if (l == 0) {
+                //            $(this).closest("dl").find("dt input:checkbox").prop("checked", false);
+                //        }
+                //        if (l2 == 0) {
+                //            $(this).parents(".permission-list").find("dt").first().find("input:checkbox").prop("checked", false);
+                //        }
+                //    }
+
+                //});
+            });
+    </script>
+
+</body>
+</html>

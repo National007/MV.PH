@@ -1,0 +1,277 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity
+@using MV.PH.WebAdmin.Inc
+@model List<MenuEntity>
+@using Lib.Data
+@using MV.PH.WebAdmin.Model.Common
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <link href="/lib/css/commonloading.css" rel="stylesheet" />
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/artDialog/ui_dialog.css" rel="stylesheet" />
+    <link href="/lib/css/skin/default/skin.css" rel="stylesheet" type="text/css" id="skin" />
+
+    <title>铭信科技后台管理系统</title>
+    <meta name="keywords" content="铭信科技后台管理系统">
+    <meta name="description" content="铭信科技后台管理系统">
+    <LINK rel="Shortcut Icon" href="/images/icon/favicon.png" />
+</head>
+<body>
+    @{
+        var User = Session["user"] as UserEntity;    //管理员信息表
+
+        var Role = ViewData["Role"] as List<RoleEntity>;     //角色信息表
+        UserFeedback_dal dal = new UserFeedback_dal();
+    }
+    <header class="Hui-header cl">
+        <a class="Hui-logo l" title="铭信科技后台管理系统" href="/Default">铭信科技后台管理系统</a> <span class="Hui-subtitle l">V1.0</span>
+        <nav class="mainnav cl" id="Hui-nav">
+            @*<ul>
+                    <li class="dropDown dropDown_click">
+                        <a href="javascript:;" class="dropDown_A"><i class="Hui-iconfont">&#xe600;</i> 新增 <i class="Hui-iconfont">&#xe6d5;</i></a>
+                        <ul class="dropDown-menu radius box-shadow">
+                            <li><a href="javascript:;" onclick="Full_layer('添加资讯', '/Article/Add')"><i class="Hui-iconfont">&#xe616;</i> 资讯</a></li>
+                            <li><a href="javascript:;" onclick="Full_layer('添加图片', '/Photo/Add')"><i class="Hui-iconfont">&#xe613;</i> 图片</a></li>
+                            <li><a href="javascript:;" onclick="Full_layer('添加视频', '/Video/Add')"><i class="Hui-iconfont">&#xe620;</i> 视频</a></li>
+                            <li><a href="javascript:;" onclick="showartDialog('添加用户', '/Admin/Add', '600px', '480px')"><i class="Hui-iconfont">&#xe60d;</i> 用户</a></li>
+                        </ul>
+                    </li>
+                </ul>*@
+        </nav>
+        <ul class="Hui-userbar">
+
+            @*<li id="nowTime" style="margin-right:100px;"></li>*@
+            @*<li>
+                @{
+                    if (User.IsAdmin == Convert.ToInt32(Post.SuperAdmin))   //系统管理员
+                    {
+                        @:系统管理员
+                    }
+                    else
+                    {
+                        @Role.RoleName
+                    }
+                }</li>*@
+            <li class="dropDown dropDown_hover">
+                <a href="javascript:;" class="dropDown_A">@User.UserName<i class="Hui-iconfont">&#xe6d5;</i></a>
+                <ul class="dropDown-menu radius box-shadow">
+                    <li><a href="javascrip:;" onclick="showartDialog('密码修改', '/Admin/ChangePwd', '660px', '220px')">密码修改</a></li>
+                    <li><a href="http://localhost:14997/Home" target="_blank">前台预览</a></li>
+                    <li><a href="javascript:;" id="out" onclick="Quit();">退出</a></li>
+                </ul>
+            </li>
+            @{
+                if (User.IsAdmin == Convert.ToInt32(Post.SuperAdmin)&&dal.GetUserFeedbackCount()>0)
+                {
+                    <li id="Hui-msg"> <a target="divMain" href="/System/CommentList?ReadStatus=@Server.UrlEncode("未读")" title="用户反馈"><span class="badge badge-danger">@dal.GetUserFeedbackCount()</span><i class="Hui-iconfont" style="font-size:18px">&#xe68a;</i></a> </li>
+                }
+            }
+            <li id="Hui-skin" class="dropDown right dropDown_hover">
+                <a href="javascript:;" title="换肤"><i class="Hui-iconfont" style="font-size:18px">&#xe62a;</i></a>
+                <ul class="dropDown-menu radius box-shadow">
+                    <li><a href="javascript:;" data-val="default" title="默认（黑色）">默认（黑色）</a></li>
+                    <li><a href="javascript:;" data-val="blue" title="蓝色">蓝色</a></li>
+                    <li><a href="javascript:;" data-val="green" title="绿色">绿色</a></li>
+                    <li><a href="javascript:;" data-val="red" title="红色">红色</a></li>
+                    <li><a href="javascript:;" data-val="yellow" title="黄色">黄色</a></li>
+                    <li><a href="javascript:;" data-val="orange" title="绿色">橙色</a></li>
+                </ul>
+            </li>
+        </ul>
+        <a aria-hidden="false" class="Hui-nav-toggle" href="#"><i class="Hui-iconfont">&#xe6bf;</i></a>
+    </header>
+
+    <aside class="Hui-aside">
+        <input id="divScrollValue" type="hidden" value="" />
+        <div class="menu_dropdown bk_2">
+            @{
+                SqlDataAccess sda = new SqlDataAccess("default");
+                if (Model.Count > 0)
+                {
+                    foreach (var item in Model)
+                    {
+                        var icon = "";
+
+                        List<MenuEntity> list = new List<MenuEntity>();
+
+                        if (User.IsAdmin == Convert.ToInt32(Post.SuperAdmin))   //系统管理员
+                        {
+                            //子菜单列表
+                            string sql = string.Format(@"select MenuID,MenuName,LinkAddress from T_Menu where MenuParentID='{0}' and IsEnable=1 order by SortNumber", item.MenuID);
+                            list = sda.FindEntities<MenuEntity>(sql);
+                        }
+                        else
+                        {
+                            //子菜单列表权限
+                            string RoleIDstring = string.Empty;
+                            if (Role.Count > 0)
+                            {
+                                foreach (var role_Children in Role)
+                                {
+                                    RoleIDstring += "'" + role_Children.RoleID + "',";
+                                }
+                                string sql = string.Format(@"select
+                                                A.MenuID,A.MenuName,A.LinkAddress,A.SortNumber
+                                             from
+                                                T_Menu A
+	                                            inner join T_RoleMenuPermission B ON A.MenuID=B.MenuID
+	                                          WHERE B.RoleID in ({0}) and  MenuParentID='{1}'
+                                                group by A.MenuName,A.MenuID,A.LinkAddress,A.SortNumber
+                                                order by A.SortNumber", RoleIDstring.TrimEnd(','), item.MenuID);
+                                list = sda.FindEntities<MenuEntity>(sql);
+
+                            }
+                        }
+                        if (list.Count > 0) //父菜单下有子菜单
+                        {
+                            icon = "<i class=\"Hui-iconfont menu_dropdown-arrow\">&#xe6d5;</i>";
+                        }
+                        <dl id="menu-article">
+                            <dt><i class="Hui-iconfont">@(new HtmlString(item.MenuBigIcon))</i><span id="ParentMenuNAME"> @item.MenuName</span> @(new HtmlString(icon))</dt>
+                            @{
+                                if (list.Count > 0)
+                                {
+                                    <dd>
+                                        <ul>
+                                            @{
+                                                foreach (var childrenMenu in list)
+                                                {
+                                                    <li><a onclick="go_url('@childrenMenu.LinkAddress',this)" href="javascript:void(0)">@childrenMenu.MenuName</a></li>
+
+                                                }
+                                            }
+
+                                        </ul>
+                                    </dd>
+                                                }
+                            }
+
+
+                        </dl>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <dl id="menu-article">
+                                                        <dt><i class="Hui-iconfont">&#xe61d;</i><span id="ParentMenuNAME">系统管理</span><i class="Hui-iconfont menu_dropdown-arrow">&#xe6d5;</i></dt>
+                                                        <dd>
+                                                            <ul>
+                                                                <li><a onclick="go_url('/Menu/List',this)" href="javascript:void(0)">菜单列表</a></li>
+                                                            </ul>
+                                                        </dd>
+                                                    </dl>
+                                                }
+
+            }
+        </div>
+    </aside>
+
+
+    <div class="dislpayArrow"><a class="pngfix" href="javascript:void(0);" onClick="displaynavbar(this)"></a></div>
+    <section class="Hui-article-box">
+        <div id="Hui-tabNav" class="Hui-tabNav">
+            <div class="Hui-tabNav-wp">
+                <ul id="min_title_list" class="acrossTab cl">
+                    <li class="active"><span title="我的桌面" data-href="">我的桌面</span><em></em></li>
+                </ul>
+            </div>
+            <div class="Hui-tabNav-more btn-group"><a id="js-tabNav-prev" class="btn radius btn-default size-S" href="javascript:;"><i class="Hui-iconfont">&#xe6d4;</i></a><a id="js-tabNav-next" class="btn radius btn-default size-S" href="javascript:;"><i class="Hui-iconfont">&#xe6d7;</i></a></div>
+        </div>
+        <div id="iframe_box" class="Hui-article">
+            <div class="show_iframe">
+                <div style="display:none" class="loading"></div>
+                <iframe scrolling="yes" frameborder="0" src="/Default/welcome1" id="divMain" name="divMain"></iframe>
+            </div>
+        </div>
+    </section>
+
+
+    <input type="hidden" id="hidMenuParent" name="hidMenuParent" />
+    <input type="hidden" id="hidMenuChildren" name="hidMenuChildren" />
+    <script src="/lib/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    @*<script src="/lib/js/CommonLoding.js"></script>*@
+    <script src="/lib/artDialog/dialog_plus_min.js"></script>
+    <script type="text/javascript" src="/lib/js/Common.js"></script>
+    @*<script type="text/javascript">
+            function current() {
+                var d = new Date(), str = '当前时间：';
+                str += d.getFullYear() + '年'; //获取当前年份
+                str += d.getMonth() + 1 + '月'; //获取当前月份（0——11）
+                str += d.getDate() + '日&nbsp;&nbsp;&nbsp;';
+                var day = d.getDay();
+                var week = new Array("星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六");
+                str += week[day] + '&nbsp;&nbsp;&nbsp;';
+
+                var hour = d.getHours();
+                var minute = d.getMinutes();
+                var second = d.getSeconds();
+                if (hour < 10) {
+                    hour = "0" + hour;
+                }
+                if (minute < 10) {
+                    minute = "0" + minute;
+                }
+                if (second < 10) {
+                    second = "0" + second;
+                }
+
+                str += hour + ':';
+                str += minute + ':';
+                str += second;
+                return str;
+            }
+            setInterval(function () { $("#nowTime").html(current) }, 1000);
+        </script>*@
+    <script type="text/javascript">
+
+        function go_url(url, obj) {
+            //alert(url+"\n"+obj);
+            $(obj).attr("_href", "" + url + "");
+            $(obj).parent().addClass("current").siblings().removeClass("current");
+            $("#hidMenuParent").val($(obj).parents("dd").siblings().find("#ParentMenuNAME").text());
+            $("#hidMenuChildren").val($(obj).text());
+        }
+        function Quit1() {
+            layer.confirm('确定要退出系统？', function () {
+                location.href = "/Login";
+            });
+        }
+
+        //退出登录
+        function Quit() {
+            parent.dialog({
+                title: '提示',
+                width: "300px",
+                content: '确定要退出系统？',
+                okValue: '确定',
+                ok: function () {
+
+                    //layer.load(2);
+                    CommonPerson.Base.LoadingPic.FullScreenShow("正在退出系统…");
+                    location.href = '/Login';
+
+                    //$(obj).parent().parent().remove(); //删除节点
+                },
+                cancelValue: '取消',
+                cancel: function () { }
+            }).showModal();
+        }
+    </script>
+</body>
+</html>

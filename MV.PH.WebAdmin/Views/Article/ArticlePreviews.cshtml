@@ -1,0 +1,295 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity
+@using MV.PH.WebAdmin.Model.Article
+@model ArticleInfoEntity
+@using MV.PH.WebAdmin.Inc;
+@*@using MV.PH.WebAdmin.Model.AccountDal*@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>ArticlePreviews</title>
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/Art_Preview.css" rel="stylesheet" />
+    <link href="/lib/lightbox2/2.8.1/css/lightbox.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    @{
+        var User = Session["user"] as UserEntity;    //管理员信息表
+        Article_dal art_dal = new Article_dal();
+        string[] str = art_dal.GetForbiddenWord().ToString().TrimEnd('|').Trim().Split('|');
+        string Title = Model.ArticleTitle;  //文章标题
+        string Content = Model.ArticleContent;  //文章内容
+        for (int i = 0; i < str.Length; i++)
+        {
+            //if (Title.IndexOf(str[i]) > 0)
+            //{
+            //    Title = Title.Replace(str[i], "**");
+            //}
+            //if (Content.IndexOf(str[i]) > 0)
+            //{
+            //    Content = Content.Replace(str[i], "**");
+            //}
+
+            if (Title.Contains(str[i]))
+            {
+                Title = Title.Replace(str[i], "**");
+            }
+            if (Content.Contains(str[i]))
+            {
+                Content = Content.Replace(str[i], "**");
+            }
+        }
+
+        var columnEntity = ViewData["column_Entity"] as ColumnEntity;
+    }
+    <div class="operating">
+        
+        <div style="float:left">
+            <a href="javascript:;" onclick="back()"><<返回上一页</a>
+        </div>
+        <div style="float:right;">
+            <a class="btn btn-success radius" style="text-decoration:none;" href="javascript:location.replace(location.href);" title="刷新">
+                <i class="Hui-iconfont">&#xe68f;</i>
+            </a>
+            @{
+                if (art_dal.GetOrginal_Title(Convert.ToString(Request.QueryString["ColumnID"]), Model.ArticleInfoID) > 0)  //该文章为原文章
+                {
+                    if (User.IsAdmin == Convert.ToInt32(Post.SuperAdmin))  //超管
+                    {
+                        @:&nbsp; &nbsp;
+                        <a class="btn btn-success radius" style="text-decoration:none;" onclick="pass('@Model.ArticleInfoID','@Request.QueryString["ColumnID"]')">
+                            审核通过
+                        </a>@:&nbsp; &nbsp;
+                        <a class="btn btn-danger radius" style="text-decoration:none;" href="javascript:;" onclick="Unpass('@Model.ArticleInfoID','@Request.QueryString["ColumnID"]')">
+                            审核不通过
+                        </a>
+                    }
+                }
+            }
+        </div>
+    </div>
+
+    <div style="width:94%;margin:0px auto;border:1px solid #E3E3E3;background:#fff;margin-bottom:80px;">
+        <div class="top">
+            <div class="title">
+                @Title
+            </div>
+            <div class="summary">
+
+                <span class="column">隶属栏目:@columnEntity.ColumnName</span>&nbsp;&nbsp;
+                <span class="create_personal">作者:@Model.Creator</span>&nbsp;&nbsp;
+                <span class="create_date">发布日期:@(Model.CreateDate.ToString("yyyy-MM-dd HH:mm"))</span>&nbsp;&nbsp;
+                <span class="art_readCount">阅读次数:@Model.ReadCount</span>&nbsp;&nbsp;
+                <span class="art_source">来源:@Model.ArticleSource</span>
+                <div class="state">
+                    <span id="left">
+                        审核状态：
+                        @{
+                            if (Model.AuditingStatus == 2)
+                            {
+                                <span id="auditing" class="state_success">审核通过</span>
+                            }
+                            else if (Model.AuditingStatus == 1)
+                            {
+                                <span id="auditing" class="state_fail">审核不通过</span>
+                            }
+                            else
+                            {
+                                <span id="auditing" class="state_no">未审核</span>
+                            }
+                        }
+                    </span>
+                    <span id="right">
+                        <a class="imgbtn" href="/Article/Edit?ArticleInfoID=@Model.ArticleInfoID">
+                            <i class="Hui-iconfont">&#xe60c;</i>编辑
+                        </a>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            @(new HtmlString(Content))
+            @*@(new HtmlString(StringHelper.ReplaceHtmlTag(Content)))*@<br />
+            
+            @{
+                var attachList = ViewData["attachList"] as List<ArticleAttachmentEntity>;
+                if (attachList.Count > 0)
+                {
+                    <dl class="permission-list" style="padding:0px;margin-top:20px;">
+                        <dt>
+                            <label>
+                                文章附件:
+                            </label>
+                        </dt>
+                        @{
+                            var i = 0;
+                            foreach (var item in attachList)
+                            {
+                                i++;
+                                if (item.FileType == "gif" || item.FileType == "jpg" || item.FileType == "jpeg" || item.FileType == "png" || item.FileType == "bmp")
+                                {
+                                    if (i == 1)
+                                    {
+                                        <dd>
+                                            <a href="@item.PhysicsName" data-lightbox="gallery" data-title="@item.FileName" title="@item.FileName"><img src="@item.PhysicsName" width="100" height="74"></a>
+                                            
+                                        </dd>
+                                    }
+                                    else
+                                    {
+                                        <dd>
+                                            <a href="@item.PhysicsName" data-lightbox="gallery" data-title="@item.FileName" title="@item.FileName">
+                                                @item.FileName
+                                            </a>
+
+                                        </dd>
+                                    }
+                                }
+                                else
+                                {
+                                    <dd>
+                                        <a href="@item.PhysicsName" title="@item.FileName">@item.FileName</a>
+                                    </dd>
+                                }
+                            }
+                        }
+
+                    </dl>
+                            }
+
+            }
+
+        </div>
+
+        <div class="footer">
+            <a href="javascript:;" onclick="back()">返回上一页>></a>
+        </div>
+    </div>
+
+    <div class="go-top dn" id="go-top">
+        @*<a href="javascript:;" class="uc-2vm"></a>
+            <div class="uc-2vm-pop dn">
+                <h2 class="title-2wm">用微信扫一扫</h2>
+                <div class="logo-2wm-box">
+                    <img src="/images/weixin.jpg" alt="小松鼠工作网" width="240" height="240">
+                </div>
+            </div>
+            <a href="http://www.lanrentuku.com/about/guestbook.html" target="_blank" class="feedback"></a>*@
+        <a href="javascript:;" class="go"></a>
+    </div>
+    <script src="/lib/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script src="/lib/js/H-ui.js"></script>
+    <script src="/lib/js/H-ui.admin.js"></script>
+    <script src="/lib/js/Common.js"></script>
+
+    <script type="text/javascript" src="/lib/lightbox2/2.8.1/js/lightbox-plus-jquery.min.js"></script>
+    <script type="text/javascript">
+
+        $(function () {
+            $(window).on('scroll', function () {
+                var st = $(document).scrollTop();
+                if (st > 0) {
+                    if ($('#main-container').length != 0) {
+                        var w = $(window).width(), mw = $('#main-container').width();
+                        if ((w - mw) / 2 > 70)
+                            $('#go-top').css({ 'left': (w - mw) / 2 + mw + 20 });
+                        else {
+                            $('#go-top').css({ 'left': 'auto' });
+                        }
+                    }
+                    $('#go-top').fadeIn(function () {
+                        $(this).removeClass('dn');
+                    });
+                } else {
+                    $('#go-top').fadeOut(function () {
+                        $(this).addClass('dn');
+                    });
+                }
+            });
+            $('#go-top .go').on('click', function () {
+                $('html,body').animate({ 'scrollTop': 0 }, 500);
+            });
+
+            $('#go-top .uc-2vm').hover(function () {
+                $('#go-top .uc-2vm-pop').removeClass('dn');
+            }, function () {
+                $('#go-top .uc-2vm-pop').addClass('dn');
+            });
+        });
+
+        /*文章批量审核通过*/
+        function pass(ID, ColumnID) {
+
+            var v = {};
+            v.ArticleIDstring = ID;
+            v.ColumnID = ColumnID;
+            v.state = "pass";
+            $.post("/Article/Auditing", v, function (r) {
+
+                if (r.Status > 0) {
+                    //var d = dialog({ content: chkcount + "条记录审核通过成功!", width: "100px" }).show();
+                    //setTimeout(function () {
+                    //    location.href = location.href;
+                    //    d.close().remove();
+                    //}, 2000);
+                    layer.msg(r.Message, { icon: 6, time: 2000 }, function (index) {
+                        layer.close(index);
+                        $("#auditing").removeClass("state_fail state_no").addClass("state_success");
+                        $("#auditing").text("审核通过");
+                    });
+
+                }
+                else {
+                    //var d = dialog({ content: r.Message, width: "200px" }).show();
+                    //setTimeout(function () {
+                    //    d.close().remove();
+                    //}, 3000);
+                    layer.msg(r.Message, { icon: 2, time: 2000 }, function (index) {
+                        layer.close(index);
+                    });
+
+                }
+            });
+        }
+
+        /*文章批量审核不通过*/
+        function Unpass(ID, ColumnID) {
+            var v = {};
+            v.ArticleIDstring = ID;
+            v.state = "Unpass";
+            v.ColumnID = ColumnID;
+            $.post("/Article/Auditing", v, function (r) {
+
+                if (r.Status > 0) {
+                    //var d = dialog({ content: chkcount + "条记录审核不通过成功!", width: "100px" }).show();
+                    //setTimeout(function () {
+                    //    location.href = location.href;
+                    //    d.close().remove();
+                    //}, 2000);
+                    layer.msg(r.Message, { icon: 5, time: 2000 }, function (index) {
+                        layer.close(index);
+                        $("#auditing").removeClass("state_success state_no").addClass("state_fail");
+                        $("#auditing").text("审核不通过");
+                    });
+                }
+                else {
+                    //var d = dialog({ content: r.Message, width: "200px" }).show();
+                    //setTimeout(function () {
+                    //    d.close().remove();
+                    //}, 3000);
+                    layer.msg(r.Message, { icon: 2, time: 2000 }, function (index) {
+                        layer.close(index);
+                    });
+
+                }
+            });
+        }
+    </script>
+</body>
+</html>

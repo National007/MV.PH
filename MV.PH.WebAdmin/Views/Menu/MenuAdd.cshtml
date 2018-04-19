@@ -1,0 +1,214 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity
+@model List<MenuEntity>
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>菜单添加</title>
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+
+    <link href="/lib/css/amazeui.css" rel="stylesheet" />
+    <script src="~/lib/jquery-1.10.2.js"></script>
+    <script src="/lib/js/amazeui.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            $("#btn").click(function () {
+
+                alert($("#chk1").val() + "\n" + $("#chk2").val()+"\n"+$("#chk3").val()+"\n"+$("#chk4").val()+"\n"+$("#chk5").val());
+
+            });
+
+            //if($("#chk2").is(":checked")) {
+            //    $("#chk2").val("1");
+            //}
+
+        });
+
+
+
+        function change(obj) {
+
+            if ($(obj).val() == "0") {
+
+                $(obj).val("1");
+
+            }
+
+            else {
+
+                $(obj).val("0");
+
+            }
+
+        }
+
+    </script>
+</head>
+<body>
+
+    <div>
+        <form action="" method="post" class="form form-horizontal" id="form-menu-add">
+
+            <div class="row cl">
+                <label class="form-label col-3"><span class="c-red">*</span>上级：</label>
+                <div class="formControls col-5">
+
+                        <select class="select" style="height:30px;" size="1" name="MenuParentID" id="MenuParentID">
+                            <option value="">顶级菜单</option>
+                            @{
+                                foreach (var item in Model)
+                                {
+                                    <option value="@item.MenuID">　├  @item.MenuName</option>
+                                }
+                            }
+                        </select>
+
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-3"><span class="c-red">*</span>菜单名称：</label>
+                <div class="formControls col-5">
+                    <input type="text" class="input-text" value="" placeholder="菜单名称" id="MenuName" name="MenuName" datatype="*" nullmsg="菜单不能为空" errormsg="请输入2-8个中文">
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-3">链接地址：</label>
+                <div class="formControls col-5">
+                    <input type="text" class="input-text" value="" placeholder="链接地址" id="LinkAddress" name="LinkAddress">
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-3">菜单图标字体：</label>
+                <div class="formControls col-5">
+                    <input type="text" class="input-text" value="" placeholder="菜单图标字体" id="MenuBigIcon" name="MenuBigIcon">
+
+                </div>
+                <div class="col-4"> <a href="~/lib/Hui-iconfont/1.0.1/demo.html" target="_blank">图标字体生成器详情表</a></div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-3"><span class="c-red">*</span>排序：</label>
+                <div class="formControls col-5">
+                    <input type="text" class="input-text" value="" placeholder="排序" id="SortNumber" name="SortNumber" datatype="n" nullmsg="排序不能为空" errormsg="请输入数字类型">
+                </div>
+                <div class="col-4"><span class="Validform_checktip"><font style="font-size:14px;color:#999999;">数字越小越靠前</font></span> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-3">物理名称：</label>
+                <div class="formControls col-5">
+                    <input type="text" class="input-text" placeholder="物理名称" name="PhysicsName" id="PhysicsName" >
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-3"><span class="c-red">*</span>状态：</label>
+                <div class="formControls col-5">
+
+                    <div class="am-btn-group" data-am-button>
+                        <label class="am-btn am-btn-default am-btn-xs am-active">
+                            <input type="radio" name="IsEnable" value="1" checked> 启用
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs">
+                            <input type="radio" name="IsEnable" value="0"> 不启用
+                        </label>
+                    </div>
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-3"></label>
+                <div class="formControls col-5">
+                    <input class="btn btn-primary radius" type="button" id="Add" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">&nbsp;&nbsp;
+                    <input class="btn btn-primary radius reset" type="button" onclick="CloseArt()" value="&nbsp;关闭&nbsp;">
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+     <script src="/lib/jquery-1.10.2.js"></script>
+    
+    <script type="text/javascript" src="/lib/Validform/5.3.2/Validform.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script type="text/javascript" src="/lib/js/Common.js"></script>
+    <script src="/lib/js/amazeui.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            //用户添加及表单验证
+            var demo = $("#form-menu-add").Validform({
+                tiptype: 2,
+                btnSubmit: "#Add",
+                //datatype: {
+                //    "zh1-6": /^[\u4E00-\u9FA5\uf900-\ufa2d]{1,6}$/,
+                //},
+                callback: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Menu/MenuAdd",
+                        data: {
+                            MenuParentID: $("#MenuParentID").val(), MenuName: $("#MenuName").val(),
+                            LinkAddress: $("#LinkAddress").val(), MenuBigIcon: $("#MenuBigIcon").val(), 
+                            SortNumber: $("#SortNumber").val(), PhysicsName: $("#PhysicsName").val(),
+                            IsEnable: $('input:radio[name="IsEnable"]:checked').val()
+                        },
+                        dataType: "json",
+                        timeout: 20000,
+                        success: function (r) {
+
+                            if (r.status == "y") {
+                                layer.msg(r.info, { icon: 1, time: 2000 }, function () {
+                                    var list = top.dialog.list;
+                                    for (var i in list) {
+                                        list[i].close();
+                                    };
+                                });
+
+                            }
+                            else {
+
+                                layer.msg(r.info, { icon: 2, time: 2000 }, function () {
+                                    var list = top.dialog.list;
+                                    for (var i in list) {
+                                        list[i].close();
+                                    };
+                                });
+                            }
+
+                        }
+                    });
+
+                    return false;
+
+                }
+            });
+            //demo.addRule([{
+            //    ele: "#MenuName",
+            //    datatype: "zh2-8",
+            //}]);
+
+        });
+    </script>
+</body>
+</html>

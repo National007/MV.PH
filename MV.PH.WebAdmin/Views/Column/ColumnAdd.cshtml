@@ -1,0 +1,390 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity
+@using Lib.Data;
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>菜单添加</title>
+    
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    
+    <link href="/lib/css/H-ui.css" rel="stylesheet" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/artDialog/ui_dialog.css" rel="stylesheet" />
+    <link href="/lib/css/amazeui.css" rel="stylesheet" />
+</head>
+<body style="padding-bottom:50px;">
+    <nav class="breadcrumb"><a href="javascript:;" onclick="back()"><i class="Hui-iconfont">&#xe6dc;</i> 返回上一页</a></nav>
+    <div>
+        <form action="" method="post" class="form form-horizontal" id="form-column-add">
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>所属栏目：</label>
+                <div class="formControls col-4">
+                    <select class="select_Column select-box inline" name="ColumnParentID" id="ColumnParentID" style="min-width:200px">
+                        <option value="">顶级类别</option>
+                        @{
+                            SqlDataAccess sda = new SqlDataAccess("default");
+
+                            var list = ViewData["columnList"] as List<ColumnEntity>;
+
+                            foreach (var item in list)
+                            {
+                                <option value="@item.ColumnID">&nbsp; &nbsp;    ├@item.ColumnName</option>
+                                string sql = string.Format(@"select ColumnID,ColumnTreeID,ColumnName from T_Column where ColumnParentID='{0}' order by SortNumber", item.ColumnID);
+                                List<ColumnEntity> Column = sda.FindEntities<ColumnEntity>(sql);
+                                foreach (var childColumn in Column)
+                                {
+                                    <option value="@childColumn.ColumnID">&nbsp; &nbsp;  &nbsp; &nbsp;    ├  @childColumn.ColumnName</option>
+                                }
+                            }
+                            }
+                    </select>
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>栏目名称：</label>
+                <div class="formControls col-4">
+                    <input type="text" class="input-text" value="" placeholder="栏目名称" id="ColumnName" name="ColumnName" datatype="*" nullmsg="栏目不能为空">
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>栏目类型：</label>
+                <div class="formControls col-4">
+                    <div class="am-btn-group" data-am-button>
+                        <label class="am-btn am-btn-default am-btn-xs am-active">
+                            <input type="radio" name="ColumnType" value="text_list" checked> 文本列表
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs">
+                            <input type="radio" name="ColumnType" value="text_image"> 文本图片
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs">
+                            <input type="radio" name="ColumnType" value="image"> 图片
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs">
+                            <input type="radio" name="ColumnType" value="video"> 视频
+                        </label>
+                    </div>
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2">大图：</label>
+                <div class="formControls col-4">
+                    <span class="btn-upload form-group">
+                        <input class="input-text upload-url" type="text" name="uploadfile-1" id="uploadfile-1" readonly style="width:294px">
+                        <a href="javascript:void();" class="btn radius upload-btn"><i class="Hui-iconfont">&#xe642;</i> 上传大图</a>
+                        <input type="file" id="BigIcon" name="BigIcon" class="input-file">
+                    </span>
+                </div>
+                <div class="col-4"> <span class="Validform_checktip"><font class="font_vaild">请上传图片文件格式，格式有/.jpg/.bmp/png/gif/jpeg</font></span></div>
+            </div>
+
+            <div class="row cl" id="trImgBig1" style="display:none">
+                <label class="form-label col-2"></label>
+                <div class="formControls col-4">
+                    <img src="" id="img1" width="100" height="100" style="display:none" />
+                    <div style="width:100px;">
+                        <span style="float:right">
+                            <a href="javascript:void(0)" onclick="Delpic1()">删除</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2">小图：</label>
+                <div class="formControls col-4">
+                    <span class="btn-upload form-group">
+                        <input class="input-text upload-url" type="text" name="uploadfile-2" id="uploadfile-2" readonly style="width:294px">
+                        <a href="javascript:void();" class="btn btn-primary radius upload-btn"><i class="Hui-iconfont">&#xe642;</i> 上传小图</a>
+                        <input type="file" id="SmallIcon" name="SmallIcon" class="input-file">
+                    </span>
+                </div>
+                <div class="col-4"> <span class="Validform_checktip"><font class="font_vaild">请上传图片文件格式，格式有/.jpg/.bmp/png/gif/jpeg</font></span></div>
+            </div>
+
+            <div class="row cl" id="trImgBig2" style="display:none">
+                <label class="form-label col-2"></label>
+                <div class="formControls col-4">
+                    <img src="" id="img2" width="100" height="100" style="display:none" />
+                    <div style="width:100px;">
+                        <span style="float:right">
+                            <a href="javascript:void(0)" onclick="Delpic2()">删除</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2">链接地址：</label>
+                <div class="formControls col-4">
+                    <input type="text" class="input-text" value="" placeholder="链接地址" id="ManualLink" name="ManualLink">
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2">打开目标：</label>
+                <div class="formControls col-4">
+                    @*<input type="text" class="input-text" value="_self" placeholder="打开目标" id="OpenTarget" name="OpenTarget">*@
+                    <span id="combox"></span>
+                </div>
+                <div class="col-4">
+                    <span class="Validform_checktip">
+                        <font class="font_vaild">如_self,_blank,...</font>
+                    </span>
+                </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>排序号码：</label>
+                <div class="formControls col-4">
+                    <input type="text" class="input-text" value="99" placeholder="排序" id="SortNumber" name="SortNumber" datatype="n" nullmsg="排序不能为空" errormsg="请输入数字类型">
+                </div>
+                <div class="col-4"><span class="Validform_checktip"><font style="font-size:12px;color:#999999;">数字越小越靠前</font></span> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>状态：</label>
+                <div class="formControls col-4">
+
+                    <div class="am-btn-group" data-am-button>
+                        <label class="am-btn am-btn-default am-btn-xs am-active">
+                            <input type="radio" name="IsEnable" value="1" checked> 启用
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs">
+                            <input type="radio" name="IsEnable" value="0"> 不启用
+                        </label>
+                    </div>
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>是否需要审核：</label>
+                <div class="formControls col-4">
+
+                    <div class="am-btn-group" data-am-button>
+                        <label class="am-btn am-btn-default am-btn-xs">
+                            <input type="radio" name="IsNeedAuditing" value="1"> 是
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs am-active">
+                            <input type="radio" name="IsNeedAuditing" value="0" checked> 否
+                        </label>
+                    </div>
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"><span class="c-red">*</span>是否导航：</label>
+                <div class="formControls col-4">
+
+                    <div class="am-btn-group" data-am-button>
+                        <label class="am-btn am-btn-default am-btn-xs am-active">
+                            <input type="radio" name="IsNavigation" value="1" checked> 是
+                        </label>
+                        <label class="am-btn am-btn-default am-btn-xs">
+                            <input type="radio" name="IsNavigation" value="0"> 否
+                        </label>
+                    </div>
+                </div>
+                <div class="col-4"> </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2">物理名称：</label>
+                <div class="formControls col-4">
+                    <input type="text" class="input-text" placeholder="物理名称" name="PhysicsName" id="PhysicsName" errormsg="字符长度应控制在30个字符以内">
+                </div>
+                <div class="col-4"> <span class="Validform_checktip"><font class="font_vaild">字符长度应控制在30个字符以内</font></span></div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"></label>
+                <div class="formControls col-4">
+                    <input class="btn btn-primary radius" type="button" id="Add" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input class="btn btn-primary radius reset" type="reset" value="&nbsp;&nbsp;重置&nbsp;&nbsp;">
+                </div>
+            </div>
+
+
+        </form>
+    </div>
+    <script src="~/lib/jquery-1.10.2.min.js"></script>
+    
+    <script type="text/javascript" src="/lib/Validform/5.3.2/Validform.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script src="/lib/jquery.form.js"></script>
+    <script src="/lib/js/amazeui.min.js"></script>
+    <script src="/lib/artDialog/dialog_plus_min.js"></script>
+
+    <script type="text/javascript" src="~/lib/js/Common.js"></script>
+    <script src="~/lib/combox/jquery.combox.js"></script>
+    <link href="~/lib/combox/styles/style.css" rel="stylesheet" />
+    <script type="text/javascript">
+        $(function () {
+            $('#combox').combox({ datas: ['_blank', '_parent', '_self','_top'] });
+        });
+    </script>
+    <script type="text/javascript">
+
+        //删除大图
+        function Delpic1() {
+            dialog({
+                title: '提示',
+                content: '您确定要删除该图片？',
+                okValue: '确定',
+                ok: function () {
+                    var d = top.dialog({ content: "删除成功!", width: "100px" }).show();
+                    setTimeout(function () {
+                        $("#uploadfile-1").val("");
+                        $("#BigIcon").val("");
+                        $("#trImgBig1").hide();
+                        //location.href = location.href;
+                        d.close().remove();
+                    }, 2000);
+
+                },
+                cancelValue: '取消',
+                cancel: function () { }
+            }).showModal();
+
+        }
+        //删除小图
+        function Delpic2() {
+            dialog({
+                title: '提示',
+                content: '您确定要删除该图片？',
+                okValue: '确定',
+                ok: function () {
+                    var d = top.dialog({ content: "删除成功!", width: "100px" }).show();
+                    setTimeout(function () {
+                        $("#uploadfile-2").val("");
+                        $("#SmallIcon").val("");
+                        $("#trImgBig2").hide();
+                        //location.href = location.href;
+                        d.close().remove();
+                    }, 2000);
+
+                },
+                cancelValue: '取消',
+                cancel: function () { }
+            }).showModal();
+
+        }
+
+        $(function () {
+
+            $("#BigIcon").on("change", function () {
+                var file = this.files[0];
+                var filename = $("#BigIcon").val();
+                var fileType = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+                if (fileType == "png" || fileType == "gif" || fileType == "bmp" || fileType == "jpg" || fileType == "jpeg") {
+                    if (this.files && file) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $("#img1").attr("src", e.target.result);
+                            $("#trImgBig1").show();
+                            $("#img1").show();
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                }
+                else {
+                    alert("请上传图片文件");
+                    $("#BigIcon").val("");
+                }
+
+            });
+
+            $("#SmallIcon").on("change", function () {
+                var file = this.files[0];
+                var filename = $("#SmallIcon").val();
+                var fileType = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+                if (fileType == "png" || fileType == "gif" || fileType == "bmp" || fileType == "jpg" || fileType == "jpeg") {
+                    if (this.files && file) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $("#img2").attr("src", e.target.result);
+                            $("#trImgBig2").show();
+                            $("#img2").show();
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                }
+                else {
+                    alert("请上传图片文件");
+                    $("#uploadfile-2").val("");
+                    $("#SmallIcon").val("");
+                }
+
+            });
+
+            //用户添加及表单验证
+            var demo = $("#form-column-add").Validform({
+                tiptype: 2,
+                btnSubmit: "#Add",
+                btnReset: ".reset",
+                callback: function () {
+                    $('#form-column-add').ajaxSubmit({
+                        type: "post",
+                        url: "/Column/ColumnAdd",
+                        data: {
+                            OpenTarget: function () {
+                                return $(".combox_input").val()
+                            }
+                        },
+                        dataType: "json",
+                        timeout: 20000,
+                        success: function (r) {
+
+                            if (r.status == "y") {
+                                layer.msg(r.info, { icon: 1, time: 2000 }, function () {
+                                    window.location.href = document.referrer;
+                                    //var list = top.dialog.list;
+                                    //for (var i in list) {
+                                    //    list[i].close();
+                                    //};
+                                });
+
+                            }
+                            else {
+
+                                layer.msg(r.info, { icon: 2, time: 2000 }, function () {
+                                    location.href = location.href;
+                                    //var list = top.dialog.list;
+                                    //for (var i in list) {
+                                    //    list[i].close();
+                                    //};
+                                });
+                            }
+
+                        }
+                    });
+
+                    return false;
+
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>

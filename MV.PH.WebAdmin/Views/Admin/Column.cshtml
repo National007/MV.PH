@@ -1,0 +1,377 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity
+@using Lib.Data
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <title>Column</title>
+    <style type="text/css">
+
+        label{
+            font-weight:bold;
+        }
+
+        label input{
+            vertical-align:text-bottom;
+        }
+
+        input[type=checkbox] {
+            height: 16px;
+            width: 16px;
+        }
+
+        #container{
+            width:99%;
+            margin:0px auto;
+            padding:0px;
+            font-size:14px;
+            border:1px solid #EFEFEF;
+        }
+        .header_text{
+            height:30px;
+            line-height:30px;
+            font-weight:bold;
+            background:#EFEFEF;
+        }
+        #container #content_cantainer{
+            margin-bottom:30px;
+            margin-top:5px;
+        }
+        #content_cantainer .permission-list1{
+            width:96%;
+            margin:0 2%;
+            padding:5px 0;
+            border-bottom:1px solid #EEEEEE;
+            
+        }
+        .listbox .listleft{
+            border:0px solid red;
+            margin-left:50px;
+            padding:5px 0;
+        }
+         .listbox .listright{
+             margin-left:50px;
+             padding-left:50px;
+             padding-bottom:5px;
+             border-bottom:1px solid #EEEEEE;
+         }
+    </style>
+</head>
+<body>
+    <form id="form1" action="" method="post">
+        <input type="hidden" id="RoleID" name="RoleID" value="@Model.RoleID" />
+
+        <div id="container">
+            <div class="header_text">
+                &nbsp;&nbsp;栏目管理
+            </div>
+            <div id="content_cantainer">
+
+                @{
+                    SqlDataAccess sda = new SqlDataAccess("default");
+                    ///  顶级栏目
+                    var ColumnList = ViewData["ColumnList"] as List<ColumnEntity>;
+                    foreach (var ParentColumn in ColumnList)
+                    {
+                        #region  //父栏目权限
+                        string sqlPermissio1 = string.Format(@"select count(0) from T_RoleColumnPermission
+                                                                                                where RoleID = '{0}' and ColumnID = '{1}'", Model.RoleID, ParentColumn.ColumnID);
+                        int ParentCount = Convert.ToInt32(sda.ExecuteScalar(sqlPermissio1));
+                        #endregion
+
+                        <div class="permission-list1">
+                            <label>
+                                <input type="checkbox" class="check1" value="@ParentColumn.ColumnID" @(ParentCount > 0 ? "checked" : "")>
+                                @ParentColumn.ColumnName
+                            </label>
+                                @{
+                                    //二级栏目
+                                    string sql = string.Format(@"select ColumnID,ColumnName from T_Column where ColumnParentID='{0}' and IsEnable=1 order by SortNumber", ParentColumn.ColumnID);
+                                    List<ColumnEntity> ChildrenColumn = sda.FindEntities<ColumnEntity>(sql);
+
+
+                                    if (ChildrenColumn.Count > 0)
+                                    {
+
+                                        foreach (var item in ChildrenColumn)
+                                        {
+                                            //三级栏目
+                                            string sql_granda = string.Format(@"select ColumnID,ColumnName from T_Column where ColumnParentID='{0}' and IsEnable=1 order by SortNumber", item.ColumnID);
+                                            List<ColumnEntity> Children2_Column = sda.FindEntities<ColumnEntity>(sql_granda);
+
+                                            #region  //二级栏目权限
+                                            string sqlPermission2 = string.Format(@"select count(0) from T_RoleColumnPermission
+                                                                                                where RoleID = '{0}' and ColumnID = '{1}'", Model.RoleID, item.ColumnID);
+                                            int ChildrentCount = Convert.ToInt32(sda.ExecuteScalar(sqlPermission2));
+                                            #endregion
+
+                                            <div class="listbox">
+                                                <div class="listleft">
+                                                    <label class="position-relative">
+                                                        <input type="checkbox" class="ace check2" value="@item.ColumnID" @(ChildrentCount > 0 ? "checked" : "") />
+                                                        @item.ColumnName
+                                                    </label>
+                                                </div>
+                                                @{ 
+                                                    if (Children2_Column.Count > 0)
+                                                    {
+                                                <div class="listright">
+
+                                                    
+                                                        @{
+                                                            foreach (var item2 in Children2_Column)
+                                                            {
+                                                                #region  //三级栏目权限
+                                                                string sqlPermission3 = string.Format(@"select count(0) from T_RoleColumnPermission
+                                                                                                where RoleID = '{0}' and ColumnID = '{1}'", Model.RoleID, item.ColumnID);
+                                                                int ChildrentCount2 = Convert.ToInt32(sda.ExecuteScalar(sqlPermission3));
+                                                                #endregion
+                                                                <label class="position-relative">
+                                                                    <input type="checkbox" class="ace check3" value="@item2.ColumnID" @(ChildrentCount2 > 0 ? "checked" : "") />
+                                                                    @item2.ColumnName
+                                                                </label>
+
+                                                            }
+                                                        }
+                                                </div>
+                                                                }
+                                                            }
+                                            </div>
+                                                                    }
+                                                                }
+                                                            }
+</div>
+                                                            }
+                            }
+
+
+                            @*<div class="permission-list1">
+                                <label>
+                                    <input type="checkbox" class="check1">
+                                    一级
+                                </label>
+                                <div class="listbox">
+                                    <div class="listleft">
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check2" />二级1
+                                        </label>
+                                    </div>
+                                    <div class="listright">
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check3" />三级1_1
+                                        </label>
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check3" />三级1_2
+                                        </label>
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check3" />三级1_3
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="listbox">
+                                    <div class="listleft">
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check2" />二级2
+                                        </label>
+                                    </div>
+                                    <div class="listright">
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check3" />三级2_1
+                                        </label>
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check3" />三级2_2
+                                        </label>
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check3" />三级3_3
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="permission-list1">
+                                <label>
+                                    <input type="checkbox" class="check1">
+                                    一级23323
+                                </label>
+                                <div class="listbox">
+                                    <div class="listleft">
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check2" />二级1
+                                        </label>
+                                    </div>
+                                    <div class="listright">
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check3" />三级1_1
+                                        </label>
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check3" />三级1_2
+                                        </label>
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check3" />三级1_3
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="listbox">
+                                    <div class="listleft">
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check2" />二级2
+                                        </label>
+                                    </div>
+                                    <div class="listright">
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check3" />三级2_1
+                                        </label>
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check3" />三级2_2
+                                        </label>
+                                        <label class="position-relative">
+                                            <input type="checkbox" class="ace check3" />三级3_3
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>*@
+                        </div>
+        </div>
+
+        <div style="text-align:center;margin-top:15px;">
+            <input class="btn btn-primary radius" type="button" id="Add" value="&nbsp;保存&nbsp">&nbsp;&nbsp;
+            <input class="btn btn-primary radius reset" type="button" onclick="CloseArt()" value="&nbsp;关闭&nbsp;">
+        </div>
+
+    </form>
+    <script src="/lib/jquery-1.10.2.js"></script>
+    
+    <script type="text/javascript" src="/lib/Validform/5.3.2/Validform.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script type="text/javascript" src="~/lib/js/Common.js"></script>
+    <script>
+
+        $(function () {
+
+            var chkcount = 0;
+            var chkstring = "";
+            $("#Add").click(function () {
+                var chk = $(":checkbox");
+
+                for (var i = 0; i < chk.length; i++) {
+                    if (chk[i].checked) {
+                        chkcount++;
+                        chkstring += chk[i].value + ",";
+                    }
+                }
+
+            });
+
+
+            //角色添加及表单验证
+            var demo = $("#form1").Validform({
+                tiptype: 2,
+                btnSubmit: "#Add",
+                btnReset: ".reset",
+                callback: function () {
+                    $.ajax({
+                        type: "post",
+                        url: "/Admin/Column",
+                        data: {
+                            RoleID: $("#RoleID").val(),
+                            ColumnIDString: chkstring
+                        },
+                        dataType: "json",
+                        timeout: 20000,
+                        success: function (r) {
+
+                            if (r.status == "y") {
+                                layer.msg(r.info, { icon: 1, time: 2000 }, function () {
+                                    //var index = parent.layer.getFrameIndex(window.name);
+                                    //parent.layer.close(index);
+                                    var list = top.dialog.list;
+                                    for (var i in list) {
+                                        list[i].close();
+                                    };
+
+                                });
+
+                            }
+                            else {
+
+                                layer.msg(r.info, { icon: 2, time: 2000 }, function () {
+                                    //var index = parent.layer.getFrameIndex(window.name);
+                                    //parent.layer.close(index);
+                                    var list = top.dialog.list;
+                                    for (var i in list) {
+                                        list[i].close();
+                                    };
+
+                                });
+                            }
+
+                        }
+                    });
+
+                    return false;
+
+                }
+            });
+
+                check3();
+                check2();
+                check1();
+            })
+            function check1(){
+                $('.check1').click(function(){
+                    var ok=$(this).prop("checked");
+                    $(this).parents('.permission-list1').find("input[type='checkbox']").prop('checked', ok);
+                })
+            };
+            function check2()
+            {
+                $('.check2').click(function(){
+                    var ok=$(this).prop("checked");
+                    $(this).parents('.listleft').siblings().andSelf().find('.check3').prop("checked",ok);
+                    var oCheck2=$(this).parents('.listbox').siblings().andSelf().find(".check2");
+                    $(this).parents('.permission-list1').find('.check1').prop("checked", trueorfalse(oCheck2));
+
+                })
+            }
+
+            function check3()
+            {
+                $('.check3').click(function(){
+                    var ockeck3 = $(this).parent().siblings().andSelf().find(".check3");
+                    $(this).parents('.listbox').find('.check2').prop("checked",trueorfalse(ockeck3));
+                    var oCheck1=$(this).parents('.listbox').siblings().andSelf().find('.check2');
+                    $(this).parents('.permission-list1').find('.check1').prop("checked", trueorfalse(oCheck1))
+
+                })
+            }
+
+            // 找同级元素的checked状态
+            function trueorfalse(obj)
+            {
+                var bool = false;
+                $(obj).each(function(){
+
+                    if($(this).prop("checked"))
+                    {
+                        bool= true;
+                    }
+                })
+                return bool;
+            }
+    </script>
+
+</body>
+</html>

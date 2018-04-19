@@ -1,0 +1,68 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity
+@model UserFeedbackEntity
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,member-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+    <title>UserFeedDetail</title>
+
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/icheck/icheck.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+
+    <link href="/lib/css/amazeui.css" rel="stylesheet" />
+</head>
+<body>
+    <div>
+        <form action="" method="post" class="form form-horizontal" id="form-admin-add">
+            <div class="row cl">
+                <label class="form-label col-2">反馈标题：</label>
+                <div class="formControls col-9">
+                   @Model.FeedbackTitle
+                </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2">反馈日期：</label>
+                <div class="formControls col-7">
+                    @Model.FeedbackDate.ToString("yyyy-MM-dd HH:mm")
+                </div>
+                <div class="col-3">@*<span class="Validform_checktip">昵称为6~18个字符</span>*@ </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2">反馈内容：</label>
+                <div class="formControls col-9" style="min-height:240px;max-height:240px;overflow-y:auto">
+                    
+                        @Model.FeedbackContent
+
+                </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-2"></label>
+                <div class="formControls col-7">
+                    <input class="btn btn-primary radius reset" type="button" onclick="CloseArt()" value="&nbsp;关闭&nbsp;">
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <script src="/lib/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script type="text/javascript" src="~/lib/js/Common.js"></script>
+    <script src="~/lib/artDialog/dialog_plus_min.js"></script>
+</body>
+</html>

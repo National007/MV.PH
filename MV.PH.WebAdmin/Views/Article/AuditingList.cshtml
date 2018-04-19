@@ -1,0 +1,667 @@
+﻿
+@{
+    Layout = null;
+}
+@using MV.PH.Entity;
+@using Lib.Data;
+@using MV.PH.WebAdmin.Model.PageHelp;
+@using MV.PH.WebAdmin.Model.Article;
+@using MV.PH.WebAdmin.Inc;
+@using MV.PH.WebAdmin.Model.AccountDal;
+@model PageListModel<P_ArticleEntity>
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <link href="/lib/css/H-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/H-ui.admin.css" rel="stylesheet" type="text/css" />
+
+    <link href="/lib/Hui-iconfont/1.0.1/iconfont.css" rel="stylesheet" type="text/css" />
+    <link href="/lib/css/pagination.css" rel="stylesheet" />
+    <link href="/lib/css/amazeui.css" rel="stylesheet" />
+    <link href="/lib/artDialog/ui_dialog.css" rel="stylesheet" />
+    <title>资讯列表</title>
+</head>
+<body>
+    <nav class="breadcrumb">
+        <i class="Hui-iconfont">&#xe67f;</i> 首页
+        <span class="c-gray en">&gt;</span> <span id="parentMenu"></span>
+        <span class="c-gray en">&gt;</span> <span id="ChildrenMenu"></span>
+        <a class="btn btn-success radius r mr-20" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新">
+            <i class="Hui-iconfont">&#xe68f;</i>
+        </a>
+    </nav>
+
+    <div class="pd-20">
+        <form id="form1" action="">
+            <div class="text-c" style="text-align:left;">
+                <select class="select_Column select-box inline" id="ColumnTreeID" name="ColumnTreeID">
+                    <option value="">所有类别</option>
+                    @{
+                        var User = Session["user"] as UserEntity;    //管理员信息表
+                        var Role = ViewData["Role"] as List<RoleEntity>;     //角色信息表
+                        SqlDataAccess sda = new SqlDataAccess("default");
+                        //父栏目列表
+                        var list = ViewData["list"] as List<ColumnEntity>;
+                        var strwhere = string.Empty;   // 文章栏目类别查询
+                        if (User.IsAdmin == Convert.ToInt32(Post.SuperAdmin))  //超管
+                        {
+                            strwhere = string.Format(@"select
+                                                            A.ColumnID,A.ColumnTreeID,A.ColumnName
+                                                         from
+                                                            T_Column A where 1=1 ");
+                        }
+                        else   //普管
+                        {
+                            if (Role.Count > 0)
+                            {
+                                string str = string.Empty;
+                                foreach (var item in Role)
+                                {
+                                    str += "'" + item.RoleID + "',";
+                                }
+                                strwhere = string.Format(@"select
+                                                            A.ColumnName,A.ColumnTreeID,A.ColumnID
+                                                                from
+                                                            T_Column A
+	                                                        inner join T_RoleColumnPermission B ON A.ColumnID=B.ColumnID
+	                                                        WHERE B.RoleID in ({0})
+                                                                ", str.TrimEnd(','));
+                            }
+
+
+                        }
+
+                        foreach (var item in list)
+                        {
+                            <option value="@item.ColumnTreeID" @(ViewBag.ColumnTreeID == item.ColumnTreeID ? "selected" : "")>&nbsp; &nbsp;    ├@item.ColumnName</option>
+
+                            string sql = string.Format(@"{1} and ColumnParentID='{0}' group by A.ColumnName,A.ColumnTreeID,A.ColumnID,A.SortNumber", item.ColumnID, strwhere);
+
+                            List<ColumnEntity> Column = sda.FindEntities<ColumnEntity>(sql);
+                            foreach (var childColumn in Column)
+                            {
+                                <option value="@childColumn.ColumnTreeID" @(ViewBag.ColumnTreeID == childColumn.ColumnTreeID ? "selected" : "")>&nbsp; &nbsp;  &nbsp; &nbsp;    ├  @childColumn.ColumnName</option>
+                                string sql2 = string.Format(@"{1} and ColumnParentID='{0}' group by A.ColumnName,A.ColumnTreeID,A.ColumnID,A.SortNumber", childColumn.ColumnID, strwhere);
+
+                                List<ColumnEntity> Column2 = sda.FindEntities<ColumnEntity>(sql2);
+                                foreach (var childColumn2 in Column2)
+                                {
+                                    <option value="@childColumn2.ColumnTreeID" @(ViewBag.ColumnTreeID == childColumn2.ColumnTreeID ? "selected" : "")>&nbsp; &nbsp;  &nbsp; &nbsp;  &nbsp; &nbsp;   ├  @childColumn2.ColumnName</option>
+                                }
+                            }
+                        }
+
+                        @*foreach (var item in list)
+                        {
+                            <option value="@item.ColumnTreeID" @(ViewBag.ColumnTreeID == item.ColumnTreeID ? "selected" : "")>&nbsp; &nbsp;    ├@item.ColumnName</option>
+
+                            string sql = string.Format(@"{1} and ColumnParentID='{0}' group by A.ColumnName,A.ColumnTreeID,A.ColumnID,A.SortNumber", item.ColumnID, strwhere);
+
+                            List<ColumnEntity> Column = sda.FindEntities<ColumnEntity>(sql);
+                            foreach (var childColumn in Column)
+                            {
+                                <option value="@childColumn.ColumnTreeID" @(ViewBag.ColumnTreeID == childColumn.ColumnTreeID ? "selected" : "")>&nbsp; &nbsp;  &nbsp; &nbsp;    ├  @childColumn.ColumnName</option>
+                            }
+                        }*@
+
+                    }
+
+                </select>
+                &nbsp;&nbsp;
+                <select class="select_Column select-box inline" id="property" name="property">
+                    <option selected value="">所有属性</option>
+                    <option value="S_AuditingStatus" @(ViewBag.property == "S_AuditingStatus" ? "selected" : "")>审核通过</option>
+                    <option value="U_AuditingStatus" @(ViewBag.property == "U_AuditingStatus" ? "selected" : "")>审核不通过</option>
+                    <option value="W_AuditingStatus" @(ViewBag.property == "W_AuditingStatus" ? "selected" : "")>待审核</option>
+                    <option value="IsRecommend" @(ViewBag.property == "IsRecommend" ? "selected" : "")>推荐</option>
+                    <option value="IsToppest" @(ViewBag.property == "IsToppest" ? "selected" : "")>置顶</option>
+                </select>
+                &nbsp;&nbsp;
+                <input type="text" name="ArticleTitle" id="ArticleTitle" value="@ViewBag.ArticleTitle" placeholder="标题名称" style="width:250px" class="input-text">
+
+                <button class="btn btn-success" type="submit"><i class="Hui-iconfont">&#xe665;</i> 查询</button>
+            </div>
+        </form>
+        
+        <div class="cl bg-1 bk-gray mt-20" style="border:0px;background:#fff; border-bottom:1px solid #eee;margin-bottom:10px; padding-bottom:5px;">
+            <div class="am-btn-group" data-am-button="">
+                <a class="am-btn am-btn-default am-btn-xs" href="javascript:;" onclick="DeleteAll()">
+                    <input type="radio" name="options" id="option1">
+                    <i class="Hui-iconfont">&#xe6e2;</i> 批量删除
+                </a>
+
+                <a class="am-btn am-btn-default am-btn-xs" href="javascript:;" onclick="pass()">
+                    <input type="radio" name="options" id="option3">
+                    <i class="Hui-iconfont">&#xe605;</i> 审核通过
+                </a>
+
+                <a class="am-btn am-btn-default am-btn-xs" href="javascript:;" onclick="Unpass()">
+                    <input type="radio" name="options" id="option3">
+                    <i class="Hui-iconfont">&#xe60e;</i> 审核不通过
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div style="padding-bottom:50px;">
+            <table class="table table-border table-bordered table-bg table-hover">
+                <thead>
+                    <tr class="text-c">
+                        <th width="50">
+                            <input type="checkbox" name="online" id="online" value="" onclick="checkAll(this)" />
+                        </th>
+                        <th width="60">编号</th>
+                        <th>标题</th>
+                        <th width="100">分类</th>
+                        <th width="80">阅读次数</th>
+                        <th width="100">属性</th>
+                        <th width="120">审核状态</th>
+                        <th width="80">状态</th>
+                        <th width="100">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @{
+                        if (Model.Data.Count < 1)
+                        {
+                            <tr class="text-c">
+                                <td colspan="9" style="text-align:center;font-size:14px;color:#666;">暂无记录!</td>
+                            </tr>
+                        }
+
+                        var count = (Model.CurrentPageIndex - 1) * Model.PageSize;
+                        foreach (var item in Model.Data)
+                        {
+                            count++;
+                            <tr class="text-c">
+                                <td><input type="checkbox" value="@item.ArticleInfoID|@item.ColumnID" /></td>
+                                <td>@count</td>
+                                <td class="text-l">
+                                  
+                                    <div style="float:left;width:78%;border:0px solid red;">
+                                        <span id="span1" style="float:left;">
+                                            <span style="border:0px solid red;position:relative;">
+                                                <a href="/Article/ArticlePreviews?ArticleID=@item.ArticleInfoID&IsAuditing=1&ColumnID=@item.ColumnID" title="@item.ArticleTitle">
+                                                   @StringHelper.bSubstring(item.ArticleTitle, 50, "…")
+                                                </a>
+                                             </span>
+                                        </span>
+
+                                    </div>
+
+                                </td>
+                                <td>
+                                    @item.ColumnName
+                                </td>
+                                <td>@item.ReadCount</td>
+                                <td>
+                                    @{
+                                        string state1 = "", state2 = "";
+                                        if (item.IsToppest == 1)
+                                        {
+                                            state1 = "selected";
+                                        }
+                                        if (item.IsRecommend == 1)
+                                        {
+                                            state2 = "selected";
+                                        }
+                                    }
+                                    <div class="btn-tools">
+
+                                        <a id="rptList1_lbtnIsTop_0" title="设置置顶" class="top @state1" href='javascript:;' onclick="Article_SetTop('@item.ArticleInfoID',this)">
+                                            <input type="hidden" id="hid" value="@item.IsToppest" />
+                                        </a>
+
+                                        <a id="rptList1_lbtnIsRed_0" title="设置推荐" class="red @state2" href='javascript:;' onclick="Article_Suggest('@item.ArticleInfoID',this)">
+                                            <input type="hidden" id="hid" value="@item.IsRecommend" />
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>
+                                    @{
+                                        if (item.AuditingStatus == 2)
+                                        {
+                                            @:审核通过
+                                        }
+                                        if (item.AuditingStatus == 1)
+                                        {
+                                            @:审核不通过
+                                        }
+                                        if (item.AuditingStatus == 0)
+                                        {
+                                            @:未审核
+                                        }
+                                    }
+                                </td>
+                                <td class="td-status">
+                                    @{
+                                        if (item.IsEnable == 1)
+                                        {
+                                            <span class="label label-success radius">已启用</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="label radius">已停用</span>
+                                        }
+                                    }
+                                </td>
+                                <td class="f-14 td-manage">
+
+                                    @{
+                                        var icon = "&#xe615;"; //启用
+                                        var title = "启用";
+                                        if (item.IsEnable == 1)
+                                        {
+                                            icon = "&#xe631;";  //停用
+                                            title = "停用";
+                                        }
+                                        <a style="text-decoration:none" onClick="Article_state('@item.ArticleInfoID',this)" href="javascript:;" title="@title">
+                                            <input type="hidden" value="@item.IsEnable" />
+                                            <i class="Hui-iconfont">@(new HtmlString(icon))</i>
+                                        </a>
+                                    }
+                                    @*<a title="详细" href="/Article/Edit?ArticleInfoID=@item.ArticleInfoID&IsEdit=0" class="ml-5" style="text-decoration:none">
+                                        <i class="Hui-iconfont">&#xe6df;</i>
+                                    </a>*@
+                                    <a style="text-decoration:none" class="ml-5" onClick="article_del('@item.ArticleInfoID','@item.ColumnID')" href="javascript:;" title="删除">
+                                        <i class="Hui-iconfont">&#xe6e2;</i>
+                                    </a>
+
+                                </td>
+                            </tr>
+                                        }
+                    }
+                </tbody>
+            </table>
+
+            <div class="pagelist">
+                <div id="PageContent" class="default">
+                    <span>共@(Model.TotalItemCount)记录</span>
+
+                    @(new HtmlString(PageUIDisplay.Display(Model.CurrentPageIndex, Model.TotalPageCount, "", 8, "")))
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <style type="text/css">
+        /* IE下的样式 */
+        #span1 {
+            width: 100%;
+            display: block;
+            /*overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;*/
+        }
+    </style>
+    <script src="/lib/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="/lib/layer/1.9.3/layer.js"></script>
+    <script type="text/javascript" src="/lib/My97DatePicker/WdatePicker.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.js"></script>
+    <script type="text/javascript" src="/lib/js/H-ui.admin.js"></script>
+    <script type="text/javascript" src="/lib/js/Common.js"></script>
+    <script src="~/lib/artDialog/dialog_plus_min.js"></script>
+    <script type="text/javascript">
+        /*资讯-批量删除*/
+        function DeleteAll() {
+            var chk = $(":checkbox");
+            var chkcount = 0;
+            var chkstring = "";
+            for (var i = 0; i < chk.length; i++) {
+                if (chk[i].checked && chk[i].id != "online") {
+                    chkcount++;
+                    chkstring += chk[i].value + ",";
+                }
+            }
+            if (chkcount > 0) {
+
+                top.dialog({
+                    title: '提示',
+                    width: "300px",
+                    content: '您已选中' + chkcount + '条记录,确认要删除吗？',
+                    okValue: '确定',
+                    ok: function () {
+
+                        var v = {};
+                        v.ArticleIDstring = chkstring;
+                        $.post("/Article/DelArticle", v, function (r) {
+
+                            if (r.Status > 0) {
+                                layer.msg(r.Message, { icon: 1, time: 1000 }, function (index) {
+                                    layer.close(index);
+                                    location.href = location.href;
+                                });
+
+                            }
+                            else {
+                                layer.msg(r.Message, { icon: 2, time: 1000 }, function (index) {
+                                    layer.close(index);
+                                    location.href = location.href;
+                                });
+
+                            }
+                        });
+                    },
+                    cancelValue: '取消',
+                    cancel: function () { }
+                }).showModal();
+
+            }
+            else {
+                ///正上方弹出提示
+                layer.msg('请选择要删除的数据', {
+                    offset: 0,
+                    shift: 6,
+                    time: 3000
+                });
+            }
+        }
+
+        /*文章删除*/
+        function article_del(ArticlInfoID, ColumnID) {
+            top.dialog({
+                title: '提示',
+                width: "300px",
+                content: '确认要删除吗？',
+                okValue: '确定',
+                ok: function () {
+
+                    var v = {};
+                    v.ArticleIDstring = ArticlInfoID;
+                    v.ColumnID = ColumnID;
+                    $.post("/Article/DelArticle", v, function (r) {
+
+                        if (r.Status > 0) {
+
+                            layer.msg(r.Message, { icon: 1, time: 1000 }, function (index) {
+                                layer.close(index);
+                                location.href = location.href;
+                            });
+
+                        }
+                        else {
+                            layer.msg(r.Message, { icon: 2, time: 1000 }, function (index) {
+                                layer.close(index);
+                                location.href = location.href;
+                            });
+
+                        }
+                    });
+                },
+                cancelValue: '取消',
+                cancel: function () { }
+            }).showModal();
+
+        }
+
+        //设置置顶
+        function Article_SetTop(id, obj) {
+            //此处请求后台程序，下方是成功后的前台处理……
+            //alert(id + "\n" + $(obj).children().val());
+            var v = {};
+            v.IsToppest = $(obj).children().val() == 1 ? "0" : "1";
+            v.ArticleInfoID = id;
+            $.post("/Article/Edit", v, function (r) {
+                if (r.status == "y") {
+                    if ($(obj).children().val() == 1) {
+                        layer.msg('已成功取消置顶!', { icon: 5, time: 1000 }, function (index) {
+                            layer.close(index);
+                            location.href = location.href;
+                        });
+                    }
+                    else {
+                        layer.msg('文章置顶设置成功!', { icon: 6, time: 1000 }, function (index) {
+                            layer.close(index);
+                            location.href = location.href;
+                        });
+
+                    }
+
+                }
+                else {
+                    layer.msg(r.message, { icon: 2, time: 1000 }, function (index) {
+                        layer.close(index);
+                        location.href = location.href;
+                    });
+                }
+            });
+        }
+
+        //设置推荐
+        function Article_Suggest(id, obj) {
+            //此处请求后台程序，下方是成功后的前台处理……
+            //alert(id + "\n" + $(obj).children().val());
+            var v = {};
+            v.IsRecommend = $(obj).children().val() == 1 ? "0" : "1";
+            v.ArticleInfoID = id;
+            $.post("/Article/Edit", v, function (r) {
+                if (r.status == "y") {
+                    if ($(obj).children().val() == 1) {
+                        layer.msg('已成功取消推荐!', { icon: 5, time: 1000 }, function (index) {
+                            layer.close(index);
+                            location.href = location.href;
+                        });
+                    }
+                    else {
+                        layer.msg('文章推荐设置成功!', { icon: 6, time: 1000 }, function (index) {
+                            layer.close(index);
+                            location.href = location.href;
+                        });
+
+                    }
+                }
+                else {
+                    layer.msg(r.message, { icon: 2, time: 1000 }, function (index) {
+                        layer.close(index);
+                        location.href = location.href;
+                    });
+                }
+            });
+        }
+
+        /*资讯-停用*/
+        function Article_state(id, obj) {
+            var title = "确认要启用吗？";
+            var msg = "已启用!";
+            var enable = 1;
+            var icon = 6;
+            if ($(obj).children().val() == 1) {
+                title = "确认要停用吗？";
+                msg = "已停用!";
+                enable = 0;
+                icon = 5;
+            }
+
+            top.dialog({
+                title: '提示',
+                width: "300px",
+                content: '' + title + '',
+                okValue: '确定',
+                ok: function () {
+
+                    var v = {};
+                    v.IsEnable = enable;
+                    v.ArticleInfoID = id;
+                    $.post("/Article/Edit", v, function (r) {
+
+                        if (r.status == "y") {
+                            //var d = dialog({ content: msg, width: "100px" }).show();
+                            //setTimeout(function () {
+                            //    location.href = location.href;
+                            //    d.close().remove();
+                            //}, 2000);
+                            if ($(obj).children().val() == 1) {  //已停用
+                                layer.msg(msg, { icon: 5, time: 1000 }, function (index) {
+                                    layer.close(index);
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                layer.msg(msg, { icon: 6, time: 1000 }, function (index) {
+                                    layer.close(index);
+                                    location.href = location.href;
+                                });
+                            }
+
+                        }
+                        else {
+                            //var d = dialog({ content: msg, width: "100px" }).show();
+                            //setTimeout(function () {
+                            //    d.close().remove();
+                            //}, 3000);
+                            layer.msg(msg, { icon: 2, time: 1000 }, function (index) {
+                                layer.close(index);
+                                location.href = location.href;
+                            });
+                        }
+                    });
+                },
+                cancelValue: '取消',
+                cancel: function () { }
+            }).showModal();
+
+        }
+
+        /*文章批量审核通过*/
+        function pass() {
+            var chk = $(":checkbox");
+            var chkcount = 0;
+            var chkstring = "";
+            for (var i = 0; i < chk.length; i++) {
+                if (chk[i].checked && chk[i].id != "online") {
+                    chkcount++;
+                    chkstring += chk[i].value + ",";
+                }
+            }
+            if (chkcount > 0) {
+
+                top.dialog({
+                    title: '提示',
+                    width: "400px",
+                    content: '您已选中' + chkcount + '条记录,确定要审核通过吗？',
+                    okValue: '确定',
+                    ok: function () {
+
+                        var v = {};
+                        v.ArticleIDstring = chkstring;
+                        v.state = "pass";
+                        $.post("/Article/Auditing", v, function (r) {
+
+                            if (r.Status > 0) {
+                                //var d = dialog({ content: chkcount + "条记录审核通过成功!", width: "100px" }).show();
+                                //setTimeout(function () {
+                                //    location.href = location.href;
+                                //    d.close().remove();
+                                //}, 2000);
+                                layer.msg(chkcount + "条记录审核通过成功!", { icon: 6, time: 1000 }, function (index) {
+                                    layer.close(index);
+                                    location.href = location.href;
+                                });
+
+                            }
+                            else {
+                                //var d = dialog({ content: r.Message, width: "200px" }).show();
+                                //setTimeout(function () {
+                                //    d.close().remove();
+                                //}, 3000);
+                                layer.msg(r.Message, { icon: 2, time: 1000 }, function (index) {
+                                    layer.close(index);
+                                    location.href = location.href;
+                                });
+
+                            }
+                        });
+                    },
+                    cancelValue: '取消',
+                    cancel: function () { }
+                }).showModal();
+
+            }
+            else {
+                parent.dialog({
+                    title: '提示',
+                    content: '对不起，请选中您要操作的记录！',
+                    okValue: '确定',
+                    ok: function () { }
+                }).showModal();
+            }
+        }
+
+        /*文章批量审核不通过*/
+        function Unpass() {
+            var chk = $(":checkbox");
+            var chkcount = 0;
+            var chkstring = "";
+            for (var i = 0; i < chk.length; i++) {
+                if (chk[i].checked && chk[i].id != "online") {
+                    chkcount++;
+                    chkstring += chk[i].value + ",";
+                }
+            }
+            if (chkcount > 0) {
+
+                top.dialog({
+                    title: '提示',
+                    width: "400px",
+                    content: '您已选中' + chkcount + '条记录,确定要审核不通过吗？',
+                    okValue: '确定',
+                    ok: function () {
+
+                        var v = {};
+                        v.ArticleIDstring = chkstring;
+                        v.state = "Unpass";
+                        $.post("/Article/Auditing", v, function (r) {
+
+                            if (r.Status > 0) {
+                                //var d = dialog({ content: chkcount + "条记录审核不通过成功!", width: "100px" }).show();
+                                //setTimeout(function () {
+                                //    location.href = location.href;
+                                //    d.close().remove();
+                                //}, 2000);
+                                layer.msg(chkcount + "条记录审核不通过成功!", { icon: 5, time: 1000 }, function (index) {
+                                    layer.close(index);
+                                    location.href = location.href;
+                                });
+                            }
+                            else {
+                                //var d = dialog({ content: r.Message, width: "200px" }).show();
+                                //setTimeout(function () {
+                                //    d.close().remove();
+                                //}, 3000);
+                                layer.msg(r.Message, { icon: 2, time: 1000 }, function (index) {
+                                    layer.close(index);
+                                    location.href = location.href;
+                                });
+
+                            }
+                        });
+                    },
+                    cancelValue: '取消',
+                    cancel: function () { }
+                }).showModal();
+
+            }
+            else {
+                parent.dialog({
+                    title: '提示',
+                    content: '对不起，请选中您要操作的记录！',
+                    okValue: '确定',
+                    ok: function () { }
+                }).showModal();
+            }
+        }
+
+    </script>
+
+</body>
+</html>
